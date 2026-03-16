@@ -155,7 +155,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
     # Current Assumptions:
     # - Yellow Refractor = No requirement b/c cardon keys aren't randomized
-    # - Balkon Gerät defeated = No req b/c +2 range upgrade in shop isn't randomized
+    # - Balkon Gerat defeated = No req b/c +2 range upgrade in shop isn't randomized
     # - Red Refractor = Lake Jyun Requirements = Jump springs & Lake Jyun keys
     # - Sub City = Lake Jyun and Clozer Requirements = Jump springs & Lake Jyun keys & Clozer keys (& Explosive ?? Not sure)
     # - Clozer sub-gate is not accessible from ruins besides (Gorubesshu Corridor), the other doors dont work
@@ -959,7 +959,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     # Requires +2 Range upgrade
-                    "Balkon Gerät defeated"
+                    "Balkon Gerat defeated"
                 ],
                 [
                     ExitData("Lake Jyun - Outside Sub-Gate")#, has_item("Range Booster Alpha"))

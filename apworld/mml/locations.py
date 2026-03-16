@@ -121,7 +121,7 @@ locationDataDict = {
     "Ferdinand defeated"                                            : LocationData(96,  LocationCategory.COMBAT,    False),
     "Bon Bonne defeated"                                            : LocationData(97,  LocationCategory.COMBAT,    False),
     "Marlwolf defeated"                                             : LocationData(98,  LocationCategory.COMBAT,    False),
-    "Balkon Gerät defeated"                                         : LocationData(99,  LocationCategory.COMBAT,    False),
+    "Balkon Gerat defeated"                                         : LocationData(99,  LocationCategory.COMBAT,    False),
     "Garudoriten defeated"                                          : LocationData(100, LocationCategory.COMBAT,    False),
     "Karumuna Bash Trio defeated"                                   : LocationData(101, LocationCategory.COMBAT,    False),
     "Focke-Wulf defeated"                                           : LocationData(102, LocationCategory.COMBAT,    False),
