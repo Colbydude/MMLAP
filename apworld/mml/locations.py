@@ -22,7 +22,7 @@ class LocationData(NamedTuple):
     category: LocationCategory
     isMissable: bool
 
-locationDataDict = {
+LOCATION_DATA_DICT = {
     "Ocean tower, Right chest"                                      : LocationData(1,   LocationCategory.CONTAINER,  True),
     "Ocean tower, Left chest"                                       : LocationData(2,   LocationCategory.CONTAINER,  True),
     "Apple market, Electric goods box"                              : LocationData(3,   LocationCategory.CONTAINER, False),
@@ -152,9 +152,9 @@ locationDataDict = {
     "Juno Defeated"                                                 : LocationData(999, LocationCategory.COMBAT,    False),
 }
 
-LOCATION_NAME_TO_ID         = {locationName: locationDataDict[locationName].id         for locationName in locationDataDict.keys()}
-LOCATION_NAME_TO_CATEGORY   = {locationName: locationDataDict[locationName].category   for locationName in locationDataDict.keys()}
-LOCATION_NAME_TO_ISMISSABLE = {locationName: locationDataDict[locationName].isMissable for locationName in locationDataDict.keys()}
+LOCATION_NAME_TO_ID         = {locationName: LOCATION_DATA_DICT[locationName].id         for locationName in LOCATION_DATA_DICT.keys()}
+LOCATION_NAME_TO_CATEGORY   = {locationName: LOCATION_DATA_DICT[locationName].category   for locationName in LOCATION_DATA_DICT.keys()}
+LOCATION_NAME_TO_ISMISSABLE = {locationName: LOCATION_DATA_DICT[locationName].isMissable for locationName in LOCATION_DATA_DICT.keys()}
 
 def get_location_names_with_ids(location_names: list[str]) -> dict[str, int | None]:
     return {location_name: LOCATION_NAME_TO_ID[location_name] for location_name in location_names}
@@ -186,7 +186,7 @@ def lock_missables_to_filler(world) -> None:
         if cls == ItemClassification.filler
     ]
     world.locked_missable_filler_names = []
-    missable_locations = [loc for loc in world.multiworld.get_locations(world.player) if locationDataDict[loc.name].isMissable]
+    missable_locations = [loc for loc in world.multiworld.get_locations(world.player) if LOCATION_DATA_DICT[loc.name].isMissable]
     for loc in missable_locations:
         name = world.random.choice(filler_item_names) 
         loc.place_locked_item(world.create_item(name))

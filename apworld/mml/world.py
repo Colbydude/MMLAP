@@ -19,6 +19,7 @@ class GameWorld(World):
 
     location_name_to_id = locations.LOCATION_NAME_TO_ID
     item_name_to_id = items.ITEM_NAME_TO_ID
+    item_name_groups = items.ITEM_NAME_GROUPS
 
     origin_region_name = "Ocean Tower - Room 1"
 
