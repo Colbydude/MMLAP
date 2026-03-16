@@ -283,11 +283,13 @@ public partial class App : Application
     {
         if (APClient.LocationManager != null && APClient.CurrentSession != null)
         {
+            Log.Logger.Information("LocationCompleted Working 1");
             // Use scouted location item to rewrite textbox
             Dictionary<int, LocationData> locationDataDict = LocationHelpers.GetLocationDataDict();
             LocationData locationData = locationDataDict[e.CompletedLocation.Id];
             if (locationData.TextBoxStartAddress != null)
             {
+                Log.Logger.Information($"LocationCompleted Working {locationData.TextBoxStartAddress}");
                 ItemData itemData = scoutedLocationItemData[e.CompletedLocation.Id];
                 Memory.WriteByteArray(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData)); // TODO: Is this big endian?
             }
@@ -298,13 +300,15 @@ public partial class App : Application
     private static bool LocationManager_EnableLocationsCondition()
     {
         bool[] conditions = [
+            Memory.ReadByte(Addresses.TitleScreen.Address) == 0xA4,
             !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber??0),
             !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber??0),
             //!Memory.ReadBit(Addresses.DungeonMapFlag.Address, Addresses.DungeonMapFlag.BitNumber??0),
             //!Memory.ReadBit(Addresses.PauseMenuFlag.Address, Addresses.PauseMenuFlag.BitNumber??0),
-            !Memory.ReadBit(Addresses.CameraAlteredFlag.Address, Addresses.CameraAlteredFlag.BitNumber??0),
             !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber??0),
-            Memory.ReadByte(Addresses.TitleScreen.Address) == 0xA4
+            !Memory.ReadBit(Addresses.CameraAlteredFlag.Address, Addresses.CameraAlteredFlag.BitNumber??0) || (
+                Memory.ReadShort(Addresses.CurrentLevel.Address) == 0x0308 // Allow locations to be checked during the Beast Hunter minigame since the camera is altered but the player is still in game.
+            )
         ];
         return conditions.All(value => value);
     }

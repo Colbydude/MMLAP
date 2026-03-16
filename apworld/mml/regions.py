@@ -95,7 +95,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             "Beetle",
             "Comic Book"
         ]
-        return has_all(has_completed_cardon_forest(), has_all_items(items))
+        return has_all([has_completed_cardon_forest(), has_all_items(items)])
 
     def has_completed_museum() -> Callable[[CollectionState], bool]:
         items = [
