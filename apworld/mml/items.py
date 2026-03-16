@@ -37,8 +37,8 @@ itemDataDict = {
     "'Sleeper' Key"                     : ItemData(0x0238, ItemClassification.progression                             ), # progresses main story -> progression
     "'Dreamer' Key"                     : ItemData(0x0239, ItemClassification.progression                             ), # progresses main story -> progression
     "Flower"                            : ItemData(0x0244, ItemClassification.progression                             ), # LOCATION NOT IMPLEMENTED YET
-    "Bag"                               : ItemData(0x0245, ItemClassification.filler                                  ), # SIDEQUESTS NOT IMPLEMENTED YET
-    "Saw"                               : ItemData(0x0248, ItemClassification.progression                             ), # SIDEQUESTS NOT IMPLEMENTED YET
+   #"Bag"                               : ItemData(0x0245, ItemClassification.filler                                  ), # SIDEQUESTS NOT IMPLEMENTED YET
+   #"Saw"                               : ItemData(0x0248, ItemClassification.progression                             ), # SIDEQUESTS NOT IMPLEMENTED YET
     "Music Box"                         : ItemData(0x024A, ItemClassification.progression                             ), # give to roll -> progression
     "Old Bone"                          : ItemData(0x024B, ItemClassification.progression                             ), # progresses museum -> progression
   # "Old Heater"                        : ItemData(0x024C, ItemClassification.progression                             ), # progresses museum -> progression

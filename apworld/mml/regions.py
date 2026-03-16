@@ -90,12 +90,12 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     def has_completed_clubhouse() -> Callable[[CollectionState], bool]:
         # The reward for this quest is not randomized, but the items for it are.
         items = [
-            "Saw",
+            #"Saw",
             "Stag Beetle",
             "Beetle",
             "Comic Book"
         ]
-        return has_all_items(items)
+        return has_all(has_completed_cardon_forest(), has_all_items(items))
 
     def has_completed_museum() -> Callable[[CollectionState], bool]:
         items = [
@@ -396,7 +396,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Downtown - Outside (Boss fight)"),
                     ExitData("Downtown - Outside (Blumebear pail)"), # Only lootable after city hall is saved
                     ExitData("Downtown - Outside (Lost Bag)", has_completed_lake_jyun()), 
-                    ExitData("Downtown - Outside (Discarded Saw)"),# , has_item("Pick")),
+                    ExitData("Downtown - Outside (Discarded Saw)", has_completed_cardon_forest()),# , has_item("Pick")),
                     ExitData("Downtown - Library"),
                     ExitData("City Hall - Outside"),
                     ExitData("Uptown"),
@@ -427,7 +427,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Downtown - Outside (Lost Bag)": 
             GameRegionData(
                 [
-                    "Downtown, Center pail"         
+                    #"Downtown, Center pail"         
                 ],
                 [
                     ExitData("Downtown - Outside")
@@ -436,7 +436,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Downtown - Outside (Discarded Saw)": 
             GameRegionData(
                 [
-                    "Downtown, Library pail"
+                    #"Downtown, Library pail"
                 ],
                 [
                     ExitData("Downtown - Outside")
@@ -828,7 +828,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     ExitData("City Hall - Outside"),
                     ExitData("Clozer Woods - Bridge Area"),
-                    ExitData("Yass Plains - Hideout Stage 1"),
+                    ExitData("Yass Plains - Hideout Stage 1", has_completed_cardon_forest()),
                     ExitData("Yass Plains - Empty House"),
                     ExitData("Yass Plains - Junk Shop House")
                 ]
