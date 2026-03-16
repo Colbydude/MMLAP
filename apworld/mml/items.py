@@ -24,12 +24,12 @@ itemDataDict = {
     "Triple Access"                     : ItemData(0x021D, ItemClassification.filler                                  ),
     "Buster Unit"                       : ItemData(0x021E, ItemClassification.filler                                  ),
     "Rapid Fire"                        : ItemData(0x021F, ItemClassification.filler                                  ),
-  # "Cardon Forest Sub-Gate Key 1"      : ItemData(0x022E, ItemClassification.progression                             ), # progresses main story -> progression
-  # "Cardon Forest Sub-Gate Key 2"      : ItemData(0x022F, ItemClassification.progression                             ), # progresses main story -> progression
-  # "Cardon Forest Sub-Gate Key 3"      : ItemData(0x0230, ItemClassification.progression                             ), # progresses main story -> progression
-    "Lake Jyun Sub-Gate Key 1"  : ItemData(0x0231, ItemClassification.progression                             ), # progresses main story -> progression
-    "Lake Jyun Sub-Gate Key 2"  : ItemData(0x0232, ItemClassification.progression                             ), # progresses main story -> progression
-    "Lake Jyun Sub-Gate Key 3"  : ItemData(0x0233, ItemClassification.progression                             ), # progresses main story -> progression
+    "Cardon Forest Sub-Gate Key 1"      : ItemData(0x022E, ItemClassification.progression                             ), # progresses main story -> progression
+    "Cardon Forest Sub-Gate Key 2"      : ItemData(0x022F, ItemClassification.progression                             ), # progresses main story -> progression
+    "Cardon Forest Sub-Gate Key 3"      : ItemData(0x0230, ItemClassification.progression                             ), # progresses main story -> progression
+    "Lake Jyun Sub-Gate Key 1"          : ItemData(0x0231, ItemClassification.progression                             ), # progresses main story -> progression
+    "Lake Jyun Sub-Gate Key 2"          : ItemData(0x0232, ItemClassification.progression                             ), # progresses main story -> progression
+    "Lake Jyun Sub-Gate Key 3"          : ItemData(0x0233, ItemClassification.progression                             ), # progresses main story -> progression
     "Clozer Woods Sub-Gate Key 1"       : ItemData(0x0234, ItemClassification.progression                             ), # progresses main story -> progression
     "Clozer Woods Sub-Gate Key 2"       : ItemData(0x0235, ItemClassification.progression                             ), # progresses main story -> progression
     "Clozer Woods Sub-Gate Key 3"       : ItemData(0x0236, ItemClassification.progression                             ), # progresses main story -> progression

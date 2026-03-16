@@ -112,6 +112,14 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         # Use has_completed_clubhouse() instead of checking for Old Heater, since it isn't randomized.
         return has_all_items(items) and has_completed_clubhouse()
     
+    def has_cardon_forest_keys() -> Callable[[CollectionState], bool]:
+        items = [
+            "Cardon Forest Sub-Gate Key 1",
+            "Cardon Forest Sub-Gate Key 2",
+            "Cardon Forest Sub-Gate Key 3"
+        ]
+        return has_all_items(items)
+
     def has_lake_jyun_keys() -> Callable[[CollectionState], bool]:
         items = [
             "Lake Jyun Sub-Gate Key 1",
@@ -136,11 +144,14 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         ]
         return has_all_items(items)
 
+    def has_completed_cardon_forest() -> Callable[[CollectionState], bool]:
+        return has_all([has_cardon_forest_keys()])
+    
     def has_completed_lake_jyun() -> Callable[[CollectionState], bool]:
-        return has_all([has_jump_springs(), has_lake_jyun_keys()])
+        return has_all([has_cardon_forest_keys(), has_jump_springs(), has_lake_jyun_keys()])
     
     def has_completed_clozer_woods() -> Callable[[CollectionState], bool]:
-        return has_all([has_completed_lake_jyun(), has_clozer_woods_keys(), has_explosive_wep()])
+        return has_all([has_cardon_forest_keys(), has_completed_lake_jyun(), has_clozer_woods_keys(), has_explosive_wep()])
 
     # Current Assumptions:
     # - Yellow Refractor = No requirement b/c cardon keys aren't randomized
@@ -157,7 +168,6 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     #
     # Known soft-locks:
     # - Can get stuck in Old City warehouse before the Bruno fight is enabled.
-    # - Can get stuck on lower level in Lake Jyun pyramid room without jump springs.
     regionDataDict = {
         "Ocean Tower - Room 1": 
             GameRegionData(
@@ -638,8 +648,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("Wily's Boat - Inside"),
-                    ExitData("Lake Jyun - Boss Fight"),#, has_completed_cardon_forest()),
-                    ExitData("Lake Jyun - Outside Sub-Gate"),#, has_completed_cardon_forest())
+                    ExitData("Lake Jyun - Boss Fight", has_completed_cardon_forest()),
+                    ExitData("Lake Jyun - Outside Sub-Gate", has_completed_cardon_forest())
                 ]
             ),
         "Museum - Floor 1": 
@@ -1061,10 +1071,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
-                    ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Upper North)"), # Has defeated BG?
+                    ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Upper North)", has_completed_cardon_forest()),
                     ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Lake Jyun Sub-Gate West Exit)"),
                     ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Lake Jyun Sub-Gate East Exit)"),
-                    ExitData("Lake Jyun Sub-Gate - Boss Room (Inactive)") # Has defeated BG?
+                    ExitData("Lake Jyun Sub-Gate - Boss Room (Inactive)", has_completed_cardon_forest())
                 ]
             ),
         "Lake Jyun Sub-Gate - Boss Room (Inactive)": 

@@ -12,6 +12,7 @@ class LocationCategory(IntEnum):
     CONTAINER = 0
     QUEST = 1
     COMBAT = 2
+    PICKUP = 3
 
 class GameLocation(Location):
     game = "Mega Man Legends"
@@ -81,9 +82,9 @@ locationDataDict = {
     "Cardon Forest Sub-Gate, Bottom conveyor hole"                  : LocationData(57,  LocationCategory.CONTAINER, False),
     "Cardon Forest Sub-Gate, Middle conveyor hole"                  : LocationData(58,  LocationCategory.CONTAINER, False),
     "Cardon Forest Sub-Gate, Middle switch chest"                   : LocationData(59,  LocationCategory.CONTAINER, False),
-   #"Cardon Forest Sub-Gate, Sharukurusu starter key 1"             : LocationData(60,  LocationCategory.CONTAINER, False),
-   #"Cardon Forest Sub-Gate, Conveyor key 2"                        : LocationData(61,  LocationCategory.CONTAINER, False),
-   #"Cardon Forest Sub-Gate, Conveyor key get 3"                    : LocationData(62,  LocationCategory.CONTAINER, False),
+    "Cardon Forest Sub-Gate, Jakko nest starter key get"            : LocationData(60,  LocationCategory.PICKUP,    False),
+    "Cardon Forest Sub-Gate, Conveyor chest starter key get"        : LocationData(61,  LocationCategory.PICKUP,    False),
+    "Cardon Forest Sub-Gate, Three switch starter key get"          : LocationData(62,  LocationCategory.PICKUP,    False),
     "Lake Jyun Sub-Gate, Entrance right hole"                       : LocationData(63,  LocationCategory.CONTAINER, False),
     "Lake Jyun Sub-Gate, Entrance left hole"                        : LocationData(64,  LocationCategory.CONTAINER, False),
     "Lake Jyun Sub-Gate, Entrance chest"                            : LocationData(65,  LocationCategory.CONTAINER, False),
