@@ -108,7 +108,14 @@ public partial class App : Application
         string command = a.Command.Trim().ToLower();
         switch (command)
         {
-            case "reload":
+            case "!help":
+                Log.Logger.Information($"> {a.Command}");
+                Log.Logger.Information("Available commands:");
+                Log.Logger.Information("!help - Show this help message.");
+                Log.Logger.Information("!reload - Force reload all items.  Use this if you think you may have missed received items.  Please reconnect to the server while in game to refresh received items.");
+                Log.Logger.Information("!goal - Check your current goal.");
+                break;
+            case "!reload":
                 Log.Logger.Information($"> {a.Command}");
                 if (APClient != null && APClient.ItemManager != null)
                 {
@@ -121,7 +128,7 @@ public partial class App : Application
                     Log.Logger.Warning("Please connect the client before attempting reload.");
                 }
                 break;
-            case "goal":
+            case "!goal":
                 Log.Logger.Information($"> {a.Command}");
                 string goalText;
                 if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goalValueObj))
@@ -283,13 +290,11 @@ public partial class App : Application
     {
         if (APClient.LocationManager != null && APClient.CurrentSession != null)
         {
-            Log.Logger.Information("LocationCompleted Working 1");
             // Use scouted location item to rewrite textbox
             Dictionary<int, LocationData> locationDataDict = LocationHelpers.GetLocationDataDict();
             LocationData locationData = locationDataDict[e.CompletedLocation.Id];
             if (locationData.TextBoxStartAddress != null)
             {
-                Log.Logger.Information($"LocationCompleted Working {locationData.TextBoxStartAddress}");
                 ItemData itemData = scoutedLocationItemData[e.CompletedLocation.Id];
                 Memory.WriteByteArray(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData)); // TODO: Is this big endian?
             }

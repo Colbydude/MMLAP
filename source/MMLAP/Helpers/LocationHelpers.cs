@@ -485,7 +485,7 @@ namespace MMLAP.Helpers
                 { 108, new LocationData(108, "Race Left Curve Course Rank A",                                 LocationCategory.Quest,     levelDataDict[0x0500], itemDataDict[0x0219], new AddressData(0xBE3B8, 5, null), null, false, null,    0x153BC3) },
                 { 109, new LocationData(109, "Race Technical Course Rank A",                                  LocationCategory.Quest,     levelDataDict[0x0500], itemDataDict[0x024F], new AddressData(0xBE3B8, 4, null), null, false, null,    0x153BC3) },
                 { 110, new LocationData(110, "Save the missing woman",                                        LocationCategory.Quest,     levelDataDict[0x0801], itemDataDict[0x0273], new AddressData(0xBE3BE, 7, null), null, false, null,    0x15332D) },
-                { 111, new LocationData(111, "Cure Ira's illness",                                            LocationCategory.Quest,     levelDataDict[0x0805], itemDataDict[0x0278], new AddressData(0xBE427, 7, null), null, false, null,    0x154657) },
+                { 111, new LocationData(111, "Cure Ira's illness",                                            LocationCategory.Quest,     levelDataDict[0x0805], itemDataDict[0x0278], new AddressData(0xBE427, 7, null), null, false, null,    0x154657) }, //The address data is not ideal
               //{ 112, new LocationData(112, "Tell painter she needs red"
               //{ 113, new LocationData(112, "Get lipstick"
                 { 114, new LocationData(114, "Museum donation, Old Bone",                                     LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, 7, null), null, false, null,    null)     },
