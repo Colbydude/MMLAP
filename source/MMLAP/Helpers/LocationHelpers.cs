@@ -120,7 +120,6 @@ namespace MMLAP.Helpers
                 { 0x1401, new LevelData("Lake Jyun Sub-Gate",             "Corridor Room",                    0x14, 0x01) },
                 { 0x1402, new LevelData("Lake Jyun Sub-Gate",             "Sharukurusu Room",                 0x14, 0x02) },
                 { 0x1403, new LevelData("Lake Jyun Sub-Gate",             "Firushudot Hall",                  0x14, 0x03) },
-                //Missing one?
                 { 0x1404, new LevelData("Lake Jyun Sub-Gate",             "Refractor Room",                   0x14, 0x04) },
                 { 0x1500, new LevelData("Bonne Ending Boat",              "Boat Interior",                    0x15, 0x00) },
                 { 0x1501, new LevelData("Bonne Ending Boat",              "Ocean",                            0x15, 0x01) },
@@ -160,7 +159,7 @@ namespace MMLAP.Helpers
                 { 0x1B02, new LevelData("Cardon Forest (Flutter Fixed)",  "City Entrance",                    0x1B, 0x02) },
                 { 0x1B03, new LevelData("Cardon Forest (Flutter Fixed)",  "Unknown (floating model)",         0x1B, 0x03) },
                 { 0x1B04, new LevelData("Cardon Forest (Flutter Fixed)",  "Unknown (floating model)",         0x1B, 0x04) },
-                { 0x1B05, new LevelData("Cardon Forest (Flutter Fixed)",  "Barrell's Room",                    0x1B, 0x05) },
+                { 0x1B05, new LevelData("Cardon Forest (Flutter Fixed)",  "Barrell's Room",                   0x1B, 0x05) },
                 { 0x1B06, new LevelData("Cardon Forest (Flutter Fixed)",  "Roll's Room",                      0x1B, 0x06) },
                 { 0x1B07, new LevelData("Cardon Forest (Flutter Fixed)",  "Flutter Lobby",                    0x1B, 0x07) },
                 { 0x1B08, new LevelData("Cardon Forest (Flutter Fixed)",  "Mega Man's Room",                  0x1B, 0x08) },
@@ -485,7 +484,7 @@ namespace MMLAP.Helpers
                 { 108, new LocationData(108, "Race Left Curve Course Rank A",                                 LocationCategory.Quest,     levelDataDict[0x0500], itemDataDict[0x0219], new AddressData(0xBE3B8, 5, null), null, false, null,    0x153BC3) },
                 { 109, new LocationData(109, "Race Technical Course Rank A",                                  LocationCategory.Quest,     levelDataDict[0x0500], itemDataDict[0x024F], new AddressData(0xBE3B8, 4, null), null, false, null,    0x153BC3) },
                 { 110, new LocationData(110, "Save the missing woman",                                        LocationCategory.Quest,     levelDataDict[0x0801], itemDataDict[0x0273], new AddressData(0xBE3BE, 7, null), null, false, null,    0x15332D) },
-                { 111, new LocationData(111, "Cure Ira's illness",                                            LocationCategory.Quest,     levelDataDict[0x0805], itemDataDict[0x0278], new AddressData(0xBE427, 7, null), null, false, null,    0x154657) }, //The address data is not ideal
+                { 111, new LocationData(111, "Cure Ira's illness",                                            LocationCategory.Quest,     levelDataDict[0x0805], itemDataDict[0x0278], new AddressData(0xBE3BE, 3, null), null, false, null,    0x154657) },
               //{ 112, new LocationData(112, "Tell painter she needs red"
               //{ 113, new LocationData(112, "Get lipstick"
                 { 114, new LocationData(114, "Museum donation, Old Bone",                                     LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, 7, null), null, false, null,    null)     },
