@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Archipelago.Core.Util;
 using MMLAP.Models;
 using static MMLAP.Models.MMLEnums;
+using System;
+using System.Collections.Generic;
 
 namespace MMLAP.Helpers
 {
@@ -207,6 +208,13 @@ namespace MMLAP.Helpers
                 endWindow
             ];
             return ConcatArrayList(substrs);
+        }
+
+        public static TextData OverwriteText(ulong startAddress, byte[] text)
+        {
+            TextData overwrittenTextData = new(startAddress, Memory.ReadByteArray(startAddress, text.Length));
+            Memory.WriteByteArray(startAddress, text);
+            return overwrittenTextData;
         }
     }
 }

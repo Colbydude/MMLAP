@@ -6,7 +6,7 @@
         byte areaCode,
         byte roomCode
         // , List<LevelData>? connectedLevels = null
-        )
+    )
     {
         public string AreaName { get; set; } = areaName;
         public string RoomName { get; set; } = roomName;

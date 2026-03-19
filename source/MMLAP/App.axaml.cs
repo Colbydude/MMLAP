@@ -43,6 +43,7 @@ public partial class App : Application
     private static Timer? GameLoopTimer { get; set; }
     private static Timer? StartMMLTimer { get; set; }
     private static ushort? PreviousLevelID { get; set; }
+    private static TextData? OverwrittenTextData { get; set; }
 
     public override void Initialize()
     {
@@ -369,7 +370,7 @@ public partial class App : Application
                                 ScoutedLocationItemData.TryGetValue(111, out var scoutedItemData)
                             )
                             {
-                                Memory.WriteByteArray(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(scoutedItemData));
+                                OverwrittenTextData = TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(scoutedItemData));
                             }
                             break;
                         default:
@@ -378,6 +379,16 @@ public partial class App : Application
                     }
                 }
                 PreviousLevelID = currentLevelID;
+
+                // Write back any overwritten text
+                if (
+                    !Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber??7) && 
+                    OverwrittenTextData != null
+                )
+                {
+                    Memory.WriteByteArray(OverwrittenTextData.StartAddress, OverwrittenTextData.TextByteArr);
+                    OverwrittenTextData = null;
+                }
             }
             catch (Exception ex)
             {
@@ -447,7 +458,7 @@ public partial class App : Application
             if (locationData.TextBoxStartAddress != null)
             {
                 ItemData itemData = ScoutedLocationItemData[e.CompletedLocation.Id];
-                Memory.WriteByteArray(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData)); // TODO: Is this big endian?
+                OverwrittenTextData = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));
             }
         }
         return;

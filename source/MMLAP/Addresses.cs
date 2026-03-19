@@ -18,5 +18,6 @@ namespace MMLAP
         public static readonly AddressData CameraAlteredFlag = new(0x98008, 0, null);
         public static readonly AddressData SaveDataMenuFlag = new(0x98910, 0, null);
         public static readonly AddressData TitleScreen = new(0x98158, null, 1); // 0xA4 = Cutscenes and in-game
+        public static readonly AddressData TextBoxOpenFlag = new(0x98A5B, 7, null);
     }
 }
