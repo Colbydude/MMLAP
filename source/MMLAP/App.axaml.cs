@@ -44,6 +44,8 @@ public partial class App : Application
     private static Timer? StartMMLTimer { get; set; }
     private static ushort? PreviousLevelID { get; set; }
     private static TextData? OverwrittenTextData { get; set; }
+    private static bool IsPreviouslyInTitleScreen { get; set; } = false;
+    private static bool IsReceivingItemsAfterLoad { get; set; } = false;
 
     public override void Initialize()
     {
@@ -300,6 +302,12 @@ public partial class App : Application
             StartMMLTimer.Interval = 5000;
             StartMMLTimer.Enabled = true;
 
+            // Start gameplay loop
+            GameLoopTimer = new Timer();
+            GameLoopTimer.Elapsed += new ElapsedEventHandler(ModifyGameLoop);
+            GameLoopTimer.Interval = 500;
+            GameLoopTimer.Enabled = true;
+
             Log.Logger.Information("Connected to Archipelago");
             Log.Logger.Information($"Playing {APClient.CurrentSession.ConnectionInfo.Game} as {APClient.CurrentSession.Players.GetPlayerName(APClient.CurrentSession.ConnectionInfo.Slot)}");
         }
@@ -325,11 +333,6 @@ public partial class App : Application
             LocationManager_EnableLocationsCondition()
         )
         {
-            // Start gameplay loop
-            GameLoopTimer = new Timer();
-            GameLoopTimer.Elapsed += new ElapsedEventHandler(ModifyGameLoop);
-            GameLoopTimer.Interval = 500;
-            GameLoopTimer.Enabled = true;
             StartMMLTimer?.Enabled = false;
             _ = APClient.ReceiveReady();
         }
@@ -346,48 +349,121 @@ public partial class App : Application
         {
             try
             {
-                // Check goal
-                CheckGoalCondition();
-
-                // Do things when changing rooms
-                ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
-                if (
-                    (currentLevelID != PreviousLevelID) && 
-                    LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData) &&
-                    Memory.ReadByte(Addresses.TitleScreen.Address) == 0xA4 &&
-                    !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0)
-                )
+                if (LocationManager_EnableLocationsCondition())
                 {
-                    switch (currentLevelData)
-                    {
-                        case { RoomName: "Ira's Room" }:
-                            // Handle Ira's Room location
-                            if (
-                                LocationDataDict.TryGetValue(111, out var iraLocationData) &&
-                                iraLocationData.Name == "Cure Ira's illness" &&
-                                iraLocationData.TextBoxStartAddress != null &&
-                                ScoutedLocationItemData != null && 
-                                ScoutedLocationItemData.TryGetValue(111, out var scoutedItemData)
-                            )
-                            {
-                                OverwrittenTextData = TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(scoutedItemData));
-                            }
-                            break;
-                        default:
-                            break;
+                    // Check goal
+                    CheckGoalCondition();
 
+                    // Do things when changing rooms
+                    ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+                    if (
+                        (currentLevelID != PreviousLevelID) && 
+                        LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData) &&
+                        MemoryHelpers.IsInGameOrCutscene() &&
+                        !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0)
+                    )
+                    {
+                        switch (currentLevelData)
+                        {
+                            case { RoomName: "Ira's Room" }:
+                                // Handle Ira's Room location
+                                if (
+                                    LocationDataDict.TryGetValue(111, out var iraLocationData) &&
+                                    iraLocationData.Name == "Cure Ira's illness" &&
+                                    iraLocationData.TextBoxStartAddress != null &&
+                                    ScoutedLocationItemData != null && 
+                                    ScoutedLocationItemData.TryGetValue(111, out var scoutedItemData)
+                                )
+                                {
+                                    OverwrittenTextData = TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(scoutedItemData));
+                                }
+                                break;
+                            default:
+                                break;
+
+                        }
+                    }
+                    PreviousLevelID = currentLevelID;
+
+                    // Write back any overwritten text
+                    if (
+                        !Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber??7) && 
+                        OverwrittenTextData != null
+                    )
+                    {
+                        Memory.WriteByteArray(OverwrittenTextData.StartAddress, OverwrittenTextData.TextByteArr);
+                        OverwrittenTextData = null;
                     }
                 }
-                PreviousLevelID = currentLevelID;
 
-                // Write back any overwritten text
+                // Handle receiving items after loading a save (leaving title screen)
+                // Logic:
+                // - Receive all non-zenny items after moving from title screen to in-game
+                // - Open all containers/holes that were previously opened
+                // Potential issues:
+                // - Currently only works on bit checks, which is fine for now since we only have bit checks
+                // - Only re-check container locations, so players can still get vanilla items from side-quest checks. But didn't want to risk breaking quest progression by writing to quest check addresses.
+                bool isCurrentlyInTitleScreen = MemoryHelpers.IsInTitleScreen();
                 if (
-                    !Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber??7) && 
-                    OverwrittenTextData != null
+                    IsPreviouslyInTitleScreen && 
+                    !isCurrentlyInTitleScreen
                 )
                 {
-                    Memory.WriteByteArray(OverwrittenTextData.StartAddress, OverwrittenTextData.TextByteArr);
-                    OverwrittenTextData = null;
+                    IsReceivingItemsAfterLoad = true;
+                }
+                IsPreviouslyInTitleScreen = isCurrentlyInTitleScreen;
+
+                if (
+                    IsReceivingItemsAfterLoad &&
+                    LocationManager_EnableLocationsCondition()
+                )
+                {
+                    IReadOnlyCollection<long> allLocationsChecked = APClient.CurrentSession.Locations.AllLocationsChecked;
+                    if (allLocationsChecked.Count > 0)
+                    {
+                        Log.Logger.Information("Re-checking previously checked container locations...");
+                        foreach (long locationID in allLocationsChecked)
+                        {
+                            if (LocationDataDict.TryGetValue((int)locationID, out LocationData? locationData))
+                            {
+                                if(new []{ LocationCategory.Container, LocationCategory.Hole, LocationCategory.Pickup }.Contains(locationData.Category))
+                                {
+                                    if (locationData.CheckAddressData.BitNumber != null)
+                                    {
+                                        Memory.WriteBit(locationData.CheckAddressData.Address, locationData.CheckAddressData.BitNumber ?? 0, true);
+                                    }
+                                    else
+                                    {
+                                        Log.Logger.Warning($"No check bit defined for location ID {locationID}. Please report this in the Discord thread!");
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Log.Logger.Warning($"Failed to receive item for location ID {locationID} after loading save. Please report this in the Discord thread!");
+                            }
+                        }
+                    }
+                    IReadOnlyCollection<ItemInfo> allItemsReceived = APClient.CurrentSession.Items.AllItemsReceived;
+                    if (allItemsReceived.Count > 0)
+                    {
+                        Log.Logger.Information("Receiving non-zenny items from previously received items...");
+                        foreach (ItemInfo itemInfo in allItemsReceived)
+                        {
+                            if(ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData))
+                            {
+                                if(itemData.Category != ItemCategory.Zenny)
+                                {
+                                    ItemHelpers.ReceiveGenericItem(itemData);
+                                }
+                            }
+                            else
+                            {
+                                Log.Logger.Warning($"Failed to receive item ID {itemInfo.ItemId} after loading save. Please report this in the Discord thread!");
+                            }
+                        }
+                    }
+                    IsReceivingItemsAfterLoad = false;
                 }
             }
             catch (Exception ex)
@@ -431,7 +507,7 @@ public partial class App : Application
     private static bool LocationManager_EnableLocationsCondition()
     {
         bool[] conditions = [
-            Memory.ReadByte(Addresses.TitleScreen.Address) == 0xA4,
+            MemoryHelpers.IsInGameOrCutscene(),
             !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber??0),
             !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber??0),
             //!Memory.ReadBit(Addresses.DungeonMapFlag.Address, Addresses.DungeonMapFlag.BitNumber??0),
