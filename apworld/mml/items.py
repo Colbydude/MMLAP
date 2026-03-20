@@ -54,7 +54,7 @@ ITEM_DATA_DICT = {
     "Beetle"                            : ItemData(0x0254, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
     "Comic Book"                        : ItemData(0x0255, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
     "Ring"                              : ItemData(0x0256, ItemClassification.progression,                             None                        ),
-   #"Mine Parts Kit"                    : ItemData(0x0258, ItemClassification.filler,                                  None                        ),
+    "Mine Parts Kit"                    : ItemData(0x0258, ItemClassification.filler,                                  None                        ),
     "Cannon Kit"                        : ItemData(0x0259, ItemClassification.progression,                             None                        ),
     "Grenade Kit"                       : ItemData(0x025A, ItemClassification.filler,                                  None                        ),
     "Blumebear Parts"                   : ItemData(0x025B, ItemClassification.useful,                                  None                        ), # strong special weapon -> useful

@@ -126,7 +126,7 @@ LOCATION_DATA_DICT = {
     "Karumuna Bash Trio defeated"                                   : LocationData(101, LocationCategory.COMBAT,    False),
     "Focke-Wulf defeated"                                           : LocationData(102, LocationCategory.COMBAT,    False),
     "Theodore Bruno defeated"                                       : LocationData(103, LocationCategory.COMBAT,    False),
-   #"Rescue the shop owner's husband"                               : LocationData(104, LocationCategory.QUEST,     False),
+    "Rescue the shop owner's husband"                               : LocationData(104, LocationCategory.QUEST,     False),
     "Beast Hunter Rank A"                                           : LocationData(105, LocationCategory.QUEST,     False),
     "Balloon Fantasy Rank A"                                        : LocationData(106, LocationCategory.QUEST,     False),
     "Race Straight Course Rank A"                                   : LocationData(107, LocationCategory.QUEST,     False),

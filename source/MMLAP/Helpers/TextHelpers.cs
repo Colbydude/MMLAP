@@ -3,6 +3,7 @@ using MMLAP.Models;
 using static MMLAP.Models.MMLEnums;
 using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 
 namespace MMLAP.Helpers
 {
@@ -176,8 +177,9 @@ namespace MMLAP.Helpers
             return coloredEncoding;
         }
 
-        public static byte[] EncodeYouGotItemWindow(ItemData itemData)
+        public static byte[] EncodeYouGotItemWindow(ItemData itemData, byte[]? suffix = null)
         {
+            suffix ??= endWindow;
             List<ItemCategory> displayedItemCategories =
             [
                 ItemCategory.Buster,
@@ -205,7 +207,7 @@ namespace MMLAP.Helpers
                 youGot,
                 itemByteArray,
                 [charDict['!']],
-                endWindow
+                suffix
             ];
             return ConcatArrayList(substrs);
         }

@@ -42,8 +42,9 @@ public partial class App : Application
     private static bool HasSubmittedGoal { get; set; } = false;
     private static Timer? GameLoopTimer { get; set; }
     private static Timer? StartMMLTimer { get; set; }
-    private static ushort? PreviousLevelID { get; set; }
     private static TextData? OverwrittenTextData { get; set; }
+    private static ushort? PreviousLevelID { get; set; }
+    private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
     private static bool IsReceivingItemsAfterLoad { get; set; } = false;
 
@@ -226,9 +227,7 @@ public partial class App : Application
         APClient.MessageReceived += Client_MessageReceived;
 
         // Connect to host and log in to slot => init Options, ItemManager, LocationManager
-        if (e.Host != null) {
-            await APClient.Connect(e.Host, "Mega Man Legends");
-        }
+        await APClient.Connect(e.Host ?? "localhost:38281", "Mega Man Legends");
         if (!APClient.IsConnected)
         {
             Log.Logger.Error("Your host seems to be invalid.  Please confirm that you have entered it correctly.");
@@ -358,32 +357,59 @@ public partial class App : Application
                     ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
                     if (
                         (currentLevelID != PreviousLevelID) && 
-                        LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData) &&
                         MemoryHelpers.IsInGameOrCutscene() &&
-                        !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0)
+                        !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber??0)
                     )
                     {
+                        IsManagingLevelChange = true;
+                    }
+                    PreviousLevelID = currentLevelID;
+
+                    if(
+                        IsManagingLevelChange &&
+                        MemoryHelpers.IsInGameOrCutscene() &&
+                        !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0) &&
+                        !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0) &&
+                        !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber ?? 0) &&
+                        LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
+                    )
+                    {
+                        Log.Logger.Information($"{currentLevelData.RoomName}");
                         switch (currentLevelData)
                         {
                             case { RoomName: "Ira's Room" }:
-                                // Handle Ira's Room location
+                                // Handle "Cure Ira's illness" location
                                 if (
                                     LocationDataDict.TryGetValue(111, out var iraLocationData) &&
+                                    ScoutedLocationItemData.TryGetValue(111, out var iraScoutedItemData) &&
                                     iraLocationData.Name == "Cure Ira's illness" &&
                                     iraLocationData.TextBoxStartAddress != null &&
-                                    ScoutedLocationItemData != null && 
-                                    ScoutedLocationItemData.TryGetValue(111, out var scoutedItemData)
+                                    ScoutedLocationItemData != null 
                                 )
                                 {
-                                    OverwrittenTextData = TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(scoutedItemData));
+                                    OverwrittenTextData = TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData));
+                                }
+                                break;
+                            case { RoomName: "Junk Shop" }:
+                                //Handle "Rescue the shop owner's husband" location
+                                if (
+                                    LocationDataDict.TryGetValue(104, out var rescueLocationData) &&
+                                    ScoutedLocationItemData.TryGetValue(104, out var rescueScoutedItemData) &&
+                                    rescueLocationData.Name == "Rescue the shop owner's husband" &&
+                                    rescueLocationData.TextBoxStartAddress != null &&
+                                    ScoutedLocationItemData != null
+                                )
+                                {
+                                    Log.Logger.Information($"Writing rescue {rescueScoutedItemData.Name}");
+                                    //OverwrittenTextData = TextHelpers.OverwriteText(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData));
+                                    Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
                                 }
                                 break;
                             default:
                                 break;
-
                         }
+                        IsManagingLevelChange = false;
                     }
-                    PreviousLevelID = currentLevelID;
 
                     // Write back any overwritten text
                     if (

@@ -334,7 +334,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Apple Market - Junk Shop (Turn-in Rescue)": 
             GameRegionData(
                 [
-                   #"Rescue the shop owner's husband"
+                   "Rescue the shop owner's husband"
                 ],
                 [
                     ExitData("Apple Market - Junk Shop")
