@@ -90,7 +90,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     def has_completed_clubhouse() -> Callable[[CollectionState], bool]:
         # The reward for this quest is not randomized, but the items for it are.
         items = [
-            "Pick"
+            "Pick",
             "Saw",
             "Stag Beetle",
             "Beetle",
@@ -111,7 +111,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             "Shiny Red Stone"
         ]
         # Use has_completed_clubhouse() instead of checking for Old Heater, since it isn't randomized.
-        return has_all_items(items) and has_completed_clubhouse()
+        return has_all([has_all_items(items), has_completed_clubhouse()])
     
     def has_cardon_forest_keys() -> Callable[[CollectionState], bool]:
         items = [
@@ -225,8 +225,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Flutter - Barrell's Room"),
                     ExitData("Flutter - Mega Man's Room"),
                     ExitData("Flutter - Roll's Room"),
-                    ExitData("Clozer Woods Sub-Gate - Entrance"),
-                    ExitData("Support Car / R&D Room")
+                    ExitData("Clozer Woods Sub-Gate - Entrance")
                 ]
             ),
         "Flutter - Barrell's Room": 
@@ -253,7 +252,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
-                    ExitData("Flutter - Common Room")
+                    ExitData("Flutter - Common Room"),
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Support Car / R&D Room": 
@@ -397,7 +397,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Downtown - Outside (Boss fight)"),
                     ExitData("Downtown - Outside (Blumebear pail)"), # Only lootable after city hall is saved
                     ExitData("Downtown - Outside (Lost Bag)", has_completed_lake_jyun()), 
-                    ExitData("Downtown - Outside (Discarded Saw)", has_completed_cardon_forest(), has_item("Pick")),
+                    ExitData("Downtown - Outside (Discarded Saw)", has_all([has_completed_cardon_forest(), has_item("Pick")])),
                     ExitData("Downtown - Library"),
                     ExitData("City Hall - Outside"),
                     ExitData("Uptown"),

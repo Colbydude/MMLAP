@@ -227,14 +227,14 @@ public partial class App : Application
         APClient.MessageReceived += Client_MessageReceived;
 
         // Connect to host and log in to slot => init Options, ItemManager, LocationManager
-        await APClient.Connect(e.Host ?? "localhost:38281", "Mega Man Legends");
+        await APClient.Connect((e.Host??"localhost:38281").Trim(), "Mega Man Legends");
         if (!APClient.IsConnected)
         {
             Log.Logger.Error("Your host seems to be invalid.  Please confirm that you have entered it correctly.");
             Context.ConnectButtonEnabled = true;
             return;
         }
-        PlayerName = e.Slot;
+        PlayerName = e.Slot??"".Trim();
         await APClient.Login(PlayerName, !string.IsNullOrWhiteSpace(e.Password) ? e.Password : null);
         if (!APClient.IsLoggedIn)
         {
