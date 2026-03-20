@@ -374,17 +374,16 @@ public partial class App : Application
                         LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
                     )
                     {
-                        Log.Logger.Information($"{currentLevelData.RoomName}");
                         switch (currentLevelData)
                         {
                             case { RoomName: "Ira's Room" }:
                                 // Handle "Cure Ira's illness" location
                                 if (
-                                    LocationDataDict.TryGetValue(111, out var iraLocationData) &&
+                                    ScoutedLocationItemData != null &&
                                     ScoutedLocationItemData.TryGetValue(111, out var iraScoutedItemData) &&
+                                    LocationDataDict.TryGetValue(111, out var iraLocationData) &&
                                     iraLocationData.Name == "Cure Ira's illness" &&
-                                    iraLocationData.TextBoxStartAddress != null &&
-                                    ScoutedLocationItemData != null 
+                                    iraLocationData.TextBoxStartAddress != null
                                 )
                                 {
                                     OverwrittenTextData = TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData));
@@ -393,14 +392,13 @@ public partial class App : Application
                             case { RoomName: "Junk Shop" }:
                                 //Handle "Rescue the shop owner's husband" location
                                 if (
-                                    LocationDataDict.TryGetValue(104, out var rescueLocationData) &&
+                                    ScoutedLocationItemData != null &&
                                     ScoutedLocationItemData.TryGetValue(104, out var rescueScoutedItemData) &&
+                                    LocationDataDict.TryGetValue(104, out var rescueLocationData) &&
                                     rescueLocationData.Name == "Rescue the shop owner's husband" &&
-                                    rescueLocationData.TextBoxStartAddress != null &&
-                                    ScoutedLocationItemData != null
+                                    rescueLocationData.TextBoxStartAddress != null
                                 )
                                 {
-                                    Log.Logger.Information($"Writing rescue {rescueScoutedItemData.Name}");
                                     //OverwrittenTextData = TextHelpers.OverwriteText(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData));
                                     Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
                                 }
