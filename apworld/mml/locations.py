@@ -33,7 +33,7 @@ LOCATION_DATA_DICT = {
     "Downtown, South east peace sign pail"                          : LocationData(8,   LocationCategory.CONTAINER, False),
     "Downtown, Center east pail"                                    : LocationData(9,   LocationCategory.CONTAINER, False),
     "Downtown, Don't kick us pail"                                  : LocationData(10,  LocationCategory.CONTAINER, False),
-   #"Downtown, Center pail"                                         : LocationData(11,  LocationCategory.CONTAINER, False),
+    "Downtown, Center pail"                                         : LocationData(11,  LocationCategory.CONTAINER, False),
     "Downtown, Library pail"                                        : LocationData(12,  LocationCategory.CONTAINER, False),
     "Uptown, Hospital right pail"                                   : LocationData(13,  LocationCategory.CONTAINER, False),
    #"Uptown, Hospital left pail"                                    : LocationData(14,  LocationCategory.CONTAINER, False),

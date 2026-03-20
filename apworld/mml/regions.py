@@ -428,7 +428,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Downtown - Outside (Lost Bag)": 
             GameRegionData(
                 [
-                    #"Downtown, Center pail"         
+                    "Downtown, Center pail"         
                 ],
                 [
                     ExitData("Downtown - Outside")

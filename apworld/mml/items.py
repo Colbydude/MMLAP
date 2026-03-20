@@ -39,7 +39,7 @@ ITEM_DATA_DICT = {
     "'Sleeper' Key"                     : ItemData(0x0238, ItemClassification.progression,                             "Sub-City Key"              ),
     "'Dreamer' Key"                     : ItemData(0x0239, ItemClassification.progression,                             "Sub-City Key"              ),
     "Flower"                            : ItemData(0x0244, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
-   #"Bag"                               : ItemData(0x0245, ItemClassification.filler,                                  None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
+    "Bag"                               : ItemData(0x0245, ItemClassification.progression,                             None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
     "Pick"                              : ItemData(0x0247, ItemClassification.progression,                             None,                       ), # SIDEQUESTS NOT IMPLEMENTED YET
     "Saw"                               : ItemData(0x0248, ItemClassification.progression,                             None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
     "Music Box"                         : ItemData(0x024A, ItemClassification.progression,                             None                        ),

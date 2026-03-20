@@ -424,6 +424,11 @@ public partial class App : Application
                                 {
                                     Memory.WriteBit(Addresses.SawPailIsReady.Address, Addresses.SawPailIsReady.BitNumber ?? 7, true);
                                 }
+                                // Handle center pail in case player can't enable dialogue chain because they already have the Bag
+                                if (Memory.ReadBit(Addresses.TurnInBagQuest.Address, Addresses.TurnInBagQuest.BitNumber ?? 6))
+                                {
+                                    Memory.WriteBit(Addresses.BagPailIsReady.Address, Addresses.BagPailIsReady.BitNumber ?? 7, true);
+                                }
                                 break;
                             case { RoomName: "Old City (dogs, no weapons)" }:
                                 // Prevent warehouse soft-lock by moving (invisible) warehouse double doors z-axis
