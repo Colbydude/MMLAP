@@ -90,7 +90,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     def has_completed_clubhouse() -> Callable[[CollectionState], bool]:
         # The reward for this quest is not randomized, but the items for it are.
         items = [
-            #"Saw",
+            "Pick"
+            "Saw",
             "Stag Beetle",
             "Beetle",
             "Comic Book"
@@ -436,7 +437,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Downtown - Outside (Discarded Saw)": 
             GameRegionData(
                 [
-                    #"Downtown, Library pail"
+                    "Downtown, Library pail"
                 ],
                 [
                     ExitData("Downtown - Outside")

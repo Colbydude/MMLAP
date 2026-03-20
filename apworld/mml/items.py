@@ -41,7 +41,7 @@ ITEM_DATA_DICT = {
     "Flower"                            : ItemData(0x0244, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
    #"Bag"                               : ItemData(0x0245, ItemClassification.filler,                                  None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
     "Pick"                              : ItemData(0x0247, ItemClassification.progression,                             None,                       ), # SIDEQUESTS NOT IMPLEMENTED YET
-   #"Saw"                               : ItemData(0x0248, ItemClassification.progression,                             None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
+    "Saw"                               : ItemData(0x0248, ItemClassification.progression,                             None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
     "Music Box"                         : ItemData(0x024A, ItemClassification.progression,                             None                        ),
     "Old Bone"                          : ItemData(0x024B, ItemClassification.progression,                             "Museum"                    ),
   # "Old Heater"                        : ItemData(0x024C, ItemClassification.progression,                             "Museum"                    ),

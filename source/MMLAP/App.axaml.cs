@@ -350,10 +350,10 @@ public partial class App : Application
             {
                 if (LocationManager_EnableLocationsCondition())
                 {
-                    // Check goal
+                    // Task 1: Check goal
                     CheckGoalCondition();
 
-                    // Do things when changing rooms
+                    // Task 2: Do things when changing rooms
                     ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
                     if (
                         (currentLevelID != PreviousLevelID) && 
@@ -405,7 +405,7 @@ public partial class App : Application
                                 }
                                 break;
                             case { RoomName: "City Hall Outdoors" }:
-                                // Handle construction worker dialogue for Pick
+                                // Handle worker dialogue for Pick
                                 List<byte[]> substrs =
                                     [
                                         TextHelpers.EncodeSimpleString("Huh? A pick?"),
@@ -417,7 +417,13 @@ public partial class App : Application
                                     ];
                                 byte[] workerTextChange = TextHelpers.ConcatArrayList(substrs);
                                 Memory.WriteByteArray(Addresses.WorkerGetPickTextStart.Address, workerTextChange);
-
+                                break;
+                            case { RoomName: "Downtown" }:
+                                // Handle library pail in case player can't trigger worker dialogue because they already have the Saw
+                                if (Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber ?? 0))
+                                {
+                                    Memory.WriteBit(Addresses.SawPailIsReady.Address, Addresses.SawPailIsReady.BitNumber ?? 7, true);
+                                }
                                 break;
                             default:
                                 break;
@@ -425,7 +431,7 @@ public partial class App : Application
                         IsManagingLevelChange = false;
                     }
 
-                    // Write back any overwritten text
+                    // Task 3: Write back any overwritten text
                     if (
                         !Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber??7) && 
                         OverwrittenTextData != null
@@ -436,7 +442,7 @@ public partial class App : Application
                     }
                 }
 
-                // Handle receiving items after loading a save (leaving title screen)
+                // Task 4: Handle receiving items after loading a save (leaving title screen)
                 // Logic:
                 // - Receive all non-zenny items after moving from title screen to in-game
                 // - Open all containers/holes that were previously opened
