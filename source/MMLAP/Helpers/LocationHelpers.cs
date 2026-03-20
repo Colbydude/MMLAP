@@ -40,7 +40,7 @@ namespace MMLAP.Helpers
                 { 0x0502, new LevelData("Downtown",                       "Library",                          0x05, 0x02) },
                 { 0x0503, new LevelData("Downtown",                       "Tron's Cockpit",                   0x05, 0x03) },
                 { 0x0504, new LevelData("Downtown",                       "Stripe Burger",                    0x05, 0x04) },
-                { 0x0600, new LevelData("City Hall",                      "Outdoors",                         0x06, 0x00) },
+                { 0x0600, new LevelData("City Hall",                      "City Hall Outdoors",               0x06, 0x00) },
                 { 0x0601, new LevelData("City Hall",                      "Amelia's Office",                  0x06, 0x01) },
                 { 0x0602, new LevelData("City Hall",                      "Outdoors (no music, combat)",      0x06, 0x02) },
                 { 0x0603, new LevelData("City Hall",                      "Teisel's Room",                    0x06, 0x03) },

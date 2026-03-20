@@ -396,7 +396,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Downtown - Outside (Boss fight)"),
                     ExitData("Downtown - Outside (Blumebear pail)"), # Only lootable after city hall is saved
                     ExitData("Downtown - Outside (Lost Bag)", has_completed_lake_jyun()), 
-                    ExitData("Downtown - Outside (Discarded Saw)", has_completed_cardon_forest()),# , has_item("Pick")),
+                    ExitData("Downtown - Outside (Discarded Saw)", has_completed_cardon_forest(), has_item("Pick")),
                     ExitData("Downtown - Library"),
                     ExitData("City Hall - Outside"),
                     ExitData("Uptown"),

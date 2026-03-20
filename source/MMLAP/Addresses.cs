@@ -19,5 +19,7 @@ namespace MMLAP
         public static readonly AddressData SaveDataMenuFlag = new(0x98910, 0, null);
         public static readonly AddressData TitleScreen = new(0x98158, null, 1); // 0xA4 = Cutscenes and in-game, 0x20 = Title screen
         public static readonly AddressData TextBoxOpenFlag = new(0x98A5B, 7, null);
+        // Dialogue
+        public static readonly AddressData WorkerGetPickTextStart = new(0x154A78, null, 0x48); // Huh? A pick? ...
     }
 }

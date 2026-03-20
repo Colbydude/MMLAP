@@ -374,6 +374,7 @@ public partial class App : Application
                         LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
                     )
                     {
+                        System.Threading.Thread.Sleep(50);
                         switch (currentLevelData)
                         {
                             case { RoomName: "Ira's Room" }:
@@ -402,6 +403,21 @@ public partial class App : Application
                                     //OverwrittenTextData = TextHelpers.OverwriteText(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData));
                                     Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
                                 }
+                                break;
+                            case { RoomName: "City Hall Outdoors" }:
+                                // Handle construction worker dialogue for Pick
+                                List<byte[]> substrs =
+                                    [
+                                        TextHelpers.EncodeSimpleString("Huh? A pick?"),
+                                        TextHelpers.newPage,
+                                        TextHelpers.EncodeSimpleString("Never heard of it.\n:)"),
+                                        TextHelpers.newPage,
+                                        TextHelpers.EncodeSimpleString("Try looking elsewhere!"),
+                                        TextHelpers.endWindow
+                                    ];
+                                byte[] workerTextChange = TextHelpers.ConcatArrayList(substrs);
+                                Memory.WriteByteArray(Addresses.WorkerGetPickTextStart.Address, workerTextChange);
+
                                 break;
                             default:
                                 break;

@@ -40,6 +40,7 @@ ITEM_DATA_DICT = {
     "'Dreamer' Key"                     : ItemData(0x0239, ItemClassification.progression,                             "Sub-City Key"              ),
     "Flower"                            : ItemData(0x0244, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
    #"Bag"                               : ItemData(0x0245, ItemClassification.filler,                                  None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
+    "Pick"                              : ItemData(0x0247, ItemClassification.progression,                             None,                       ), # SIDEQUESTS NOT IMPLEMENTED YET
    #"Saw"                               : ItemData(0x0248, ItemClassification.progression,                             None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
     "Music Box"                         : ItemData(0x024A, ItemClassification.progression,                             None                        ),
     "Old Bone"                          : ItemData(0x024B, ItemClassification.progression,                             "Museum"                    ),
@@ -155,23 +156,21 @@ def create_all_items(world: GameWorld) -> None:
         add_count = 1
         match itemName:
             case "10 Zenny":
-                # Reduced count of some filler items to temporarily add Flower, Comic Book, Beetle, and Stag Beetle
-                # TODO: Revert when locations are randomized.
-                #for _ in range(2):
-                #    itemPool.append(world.create_item(itemName))
-                    add_count = 0
-            case "20 Zenny":
-                #for _ in range(2):
-                #    itemPool.append(world.create_item(itemName))
-                    add_count = 0
-            case "920 Zenny":
-                for _ in range(2):
+                add_count = 2
+                for _ in range(add_count):
                     itemPool.append(world.create_item(itemName))
-                    add_count = 2
+            case "20 Zenny":
+                add_count = 2
+                for _ in range(add_count):
+                    itemPool.append(world.create_item(itemName))
+            case "920 Zenny":
+                add_count = 2
+                for _ in range(add_count):
+                    itemPool.append(world.create_item(itemName))
             case "Nothing":
+                add_count = 0
                #for _ in range(5):
                #    itemPool.append(world.create_item(itemName))
-                add_count = 0
             case "Buster Max":
                 add_count = 0
             case _:
