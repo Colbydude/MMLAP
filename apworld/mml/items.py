@@ -170,7 +170,7 @@ def create_all_items(world: GameWorld) -> None:
             case _:
                 add_count = 1
         for _ in range(add_count):
-                    itemPool.append(world.create_item(itemName))
+            itemPool.append(world.create_item(itemName))
 
         # Handle quantities for locked (missable) location items 
         locked_for_name = locked_counts.get(itemName, 0)
