@@ -99,6 +99,7 @@ ITEM_DATA_DICT = {
     "560 Zenny"                         : ItemData(0x8038, ItemClassification.filler,                                  None                        ),
     "660 Zenny"                         : ItemData(0x8042, ItemClassification.filler,                                  None                        ),
     "780 Zenny"                         : ItemData(0x804E, ItemClassification.filler,                                  None                        ),
+    "800 Zenny"                         : ItemData(0x8050, ItemClassification.filler,                                  None                        ),
     "820 Zenny"                         : ItemData(0x8052, ItemClassification.filler,                                  None                        ),
     "920 Zenny"                         : ItemData(0x805C, ItemClassification.filler,                                  None                        ),
     "1180 Zenny"                        : ItemData(0x8076, ItemClassification.filler,                                  None                        ),
@@ -158,24 +159,18 @@ def create_all_items(world: GameWorld) -> None:
         match itemName:
             case "10 Zenny":
                 add_count = 2
-                for _ in range(add_count):
-                    itemPool.append(world.create_item(itemName))
             case "20 Zenny":
                 add_count = 2
-                for _ in range(add_count):
-                    itemPool.append(world.create_item(itemName))
             case "920 Zenny":
                 add_count = 2
-                for _ in range(add_count):
-                    itemPool.append(world.create_item(itemName))
             case "Nothing":
-                add_count = 0
-               #for _ in range(5):
-               #    itemPool.append(world.create_item(itemName))
+                add_count = 0 # 4
             case "Buster Max":
                 add_count = 0
             case _:
                 add_count = 1
+        for _ in range(add_count):
+                    itemPool.append(world.create_item(itemName))
 
         # Handle quantities for locked (missable) location items 
         locked_for_name = locked_counts.get(itemName, 0)

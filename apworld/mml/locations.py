@@ -36,7 +36,7 @@ LOCATION_DATA_DICT = {
     "Downtown, Center pail"                                         : LocationData(11,  LocationCategory.CONTAINER, False),
     "Downtown, Library pail"                                        : LocationData(12,  LocationCategory.CONTAINER, False),
     "Uptown, Hospital right pail"                                   : LocationData(13,  LocationCategory.CONTAINER, False),
-   #"Uptown, Hospital left pail"                                    : LocationData(14,  LocationCategory.CONTAINER, False),
+    "Uptown, Hospital left pail"                                    : LocationData(14,  LocationCategory.CONTAINER, False),
     "Uptown, Ocean corner pail"                                     : LocationData(15,  LocationCategory.CONTAINER, False),
     "Wily's Boat, Right box"                                        : LocationData(16,  LocationCategory.CONTAINER, False),
    #"Wily's Boat, Left box"                                         : LocationData(17,  LocationCategory.CONTAINER, False),

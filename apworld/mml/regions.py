@@ -537,7 +537,6 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     "Uptown, Hospital right pail",
-                   #"Uptown, Hospital left pail",
                     "Uptown, Ocean corner pail"
                 ],
                 [
@@ -547,7 +546,17 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Wily's Boat - Walkway"),
                     ExitData("Uptown - TV Station"),
                     ExitData("Uptown Sub-City - City", has_completed_clozer_woods()),
-                    ExitData("Support Car / R&D Room")
+                    ExitData("Support Car / R&D Room"),
+                    ExitData("Uptown - (Hospital left pail)", has_completed_cardon_forest())
+                ]
+            ),
+        "Uptown - (Hospital left pail)":
+            GameRegionData(
+                [
+                   "Uptown, Hospital left pail"
+                ],
+                [
+                    ExitData("Uptown")
                 ]
             ),
         "Uptown - Hospital": 

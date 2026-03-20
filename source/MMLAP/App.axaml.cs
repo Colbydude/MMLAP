@@ -425,7 +425,7 @@ public partial class App : Application
                                     Memory.WriteBit(Addresses.SawPailIsReady.Address, Addresses.SawPailIsReady.BitNumber ?? 7, true);
                                 }
                                 // Handle center pail in case player can't enable dialogue chain because they already have the Bag
-                                if (Memory.ReadBit(Addresses.TurnInBagQuest.Address, Addresses.TurnInBagQuest.BitNumber ?? 6))
+                                if (Memory.ReadBit(0xBE3BA, 6))
                                 {
                                     Memory.WriteBit(Addresses.BagPailIsReady.Address, Addresses.BagPailIsReady.BitNumber ?? 7, true);
                                 }
