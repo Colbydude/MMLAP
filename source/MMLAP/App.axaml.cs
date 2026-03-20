@@ -573,7 +573,10 @@ public partial class App : Application
             //!Memory.ReadBit(Addresses.PauseMenuFlag.Address, Addresses.PauseMenuFlag.BitNumber??0),
             !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber??0),
             !Memory.ReadBit(Addresses.CameraAlteredFlag.Address, Addresses.CameraAlteredFlag.BitNumber??0) || (
-                Memory.ReadShort(Addresses.CurrentLevel.Address) == 0x0308 // Allow locations to be checked during the Beast Hunter minigame since the camera is altered but the player is still in game.
+                new short [] {
+                    0x0803,  // Allow locations to be checked during the Beast Hunter minigame since the camera is altered but the player is still in game.
+                    0x0F01   // Turn in missing bag has altered camera
+                }.Contains(Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big))
             )
         ];
         return conditions.All(value => value);

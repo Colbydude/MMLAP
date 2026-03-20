@@ -84,7 +84,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         has_powered_buster = has_item("Cannon Kit")
         has_grand_grenade = has_item("Bomb Schematic")
         has_active_buster = has_item("Guidance Unit")
-        has_spread_buster = has_all_items(["Ancient Book", "Old Launcher"])
+        has_spread_buster = has_all_items(["Ancient Book", "Old Launcher", "Arm Supporter"])
         return has_any([has_powered_buster, has_grand_grenade, has_active_buster, has_spread_buster])
 
     def has_completed_clubhouse() -> Callable[[CollectionState], bool]:
@@ -508,10 +508,20 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "City Hall - Inspector's Office": 
             GameRegionData(
                 [
-
+                    
                 ],
                 [
-                    ExitData("City Hall - Police Station")
+                    ExitData("City Hall - Police Station"),
+                    ExitData("City Hall - Inspector's Office (Turn in Bag)", has_item("Bag"))
+                ]
+            ),
+        "City Hall - Inspector's Office (Turn in Bag)": 
+            GameRegionData(
+                [
+                    "Turn in missing bag"
+                ],
+                [
+                    ExitData("City Hall - Inspector's Office")
                 ]
             ),
         "City Hall - Bank": 

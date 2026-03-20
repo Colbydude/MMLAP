@@ -499,7 +499,8 @@ namespace MMLAP.Helpers
                 { 123, new LocationData(123, "Take dangerous object from museum visitor",                     LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x026B], new AddressData(0xBE37D, 0, null), null, false, null,    0x155387) },
                 { 124, new LocationData(124, "Gift Flower to Roll",                                           LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 7, null), null, false, null,    null)     },
                 { 125, new LocationData(125, "Gift Music Box to Roll",                                        LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 6, null), null, false, null,    null)     },
-                { 126, new LocationData(126, "Gift Ring to Roll",                                             LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 5, null), null, false, null,    null)     }
+                { 126, new LocationData(126, "Gift Ring to Roll",                                             LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 5, null), null, false, null,    null)     },
+                { 127, new LocationData(127, "Turn in missing bag",                                           LocationCategory.Quest,     levelDataDict[0x0F01], itemDataDict[0x0268], new AddressData(0xBE3BA, 6, null), null, false, null,    0x1539A2) }
             };
             return locationDataDict;
         }

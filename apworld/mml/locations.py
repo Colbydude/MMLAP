@@ -149,6 +149,7 @@ LOCATION_DATA_DICT = {
     "Gift Flower to Roll"                                           : LocationData(124, LocationCategory.QUEST,     False),
     "Gift Music Box to Roll"                                        : LocationData(125, LocationCategory.QUEST,     False),
     "Gift Ring to Roll"                                             : LocationData(126, LocationCategory.QUEST,     False),
+    "Turn in missing bag"                                           : LocationData(127, LocationCategory.QUEST,     False),
     "Juno Defeated"                                                 : LocationData(999, LocationCategory.COMBAT,    False),
 }
 
@@ -175,8 +176,7 @@ def create_regular_locations(world: GameWorld) -> None:
 
 def create_events(world: GameWorld) -> None:
     juno_region = world.get_region("Main Gate - Juno Area (Boss)")
-    juno_region.add_event("Juno Defeated", "Victory", location_type=GameLocation,
-                       item_type=items.GameItem, rule=lambda state: True)  # Add logic for beating Juno with access.
+    juno_region.add_event("Juno Defeated", "Victory", location_type=GameLocation, item_type=items.GameItem, rule=lambda state: True)  # Add logic for beating Juno with access.
     world.multiworld.completion_condition[world.player] = lambda state: state.has("Victory", world.player)
 
 def lock_missables_to_filler(world) -> None:

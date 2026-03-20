@@ -70,6 +70,7 @@ ITEM_DATA_DICT = {
     "Pen Light"                         : ItemData(0x0265, ItemClassification.filler,                                  None                        ),
     "Old Launcher"                      : ItemData(0x0266, ItemClassification.progression,                             None                        ),
     "Ancient Book"                      : ItemData(0x0267, ItemClassification.progression,                             None                        ),
+    "Arm Supporter"                     : ItemData(0x0268, ItemClassification.progression,                             None                        ),
     "Weapon Plans"                      : ItemData(0x026A, ItemClassification.useful,                                  None                        ), # strong special weapon -> useful
     "Prism Crystal"                     : ItemData(0x026B, ItemClassification.useful,                                  None                        ), # strong special weapon -> useful
     "Spring Set"                        : ItemData(0x026C, ItemClassification.useful | ItemClassification.progression, None                        ), # strong special items -> useful
