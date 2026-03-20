@@ -23,5 +23,7 @@ namespace MMLAP
         public static readonly AddressData WorkerGetPickTextStart = new(0x154A78, null, 0x48); // Huh? A pick? ...
         public static readonly AddressData SawWorkerDialogueIsReady = new(0xBE3BC, 0, null);
         public static readonly AddressData SawPailIsReady = new(0xBE3BD, 7, null);
+        // Main story flags
+        public static readonly AddressData subCitiesSurfaced = new(0xBE382, 1, null);
     }
 }

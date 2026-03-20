@@ -425,6 +425,14 @@ public partial class App : Application
                                     Memory.WriteBit(Addresses.SawPailIsReady.Address, Addresses.SawPailIsReady.BitNumber ?? 7, true);
                                 }
                                 break;
+                            case { RoomName: "Old City (dogs, no weapons)" }:
+                                // Prevent warehouse soft-lock by moving (invisible) warehouse double doors z-axis
+                                if(!Memory.ReadBit(Addresses.subCitiesSurfaced.Address, Addresses.subCitiesSurfaced.BitNumber??1))
+                                {
+                                    Memory.WriteByte(0x1169D4, 0xFF);
+                                    Memory.WriteByte(0x1169EB, 0xFF);
+                                }
+                                break;
                             default:
                                 break;
                         }
