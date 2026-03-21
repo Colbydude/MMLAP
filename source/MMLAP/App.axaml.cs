@@ -427,7 +427,10 @@ public partial class App : Application
                                     break;
                                 case { RoomName: "Downtown" }:
                                     // Handle library pail in case player can't trigger worker dialogue because they already have the Saw
-                                    if (Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber ?? 0))
+                                    if (
+                                        Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber??0) ||
+                                        Memory.ReadBit(Addresses.TurnedInSaw.Address, Addresses.TurnedInSaw.BitNumber??5)
+                                    )
                                     {
                                         Memory.WriteBit(Addresses.SawPailIsReady.Address, Addresses.SawPailIsReady.BitNumber ?? 7, true);
                                     }
