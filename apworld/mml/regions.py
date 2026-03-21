@@ -92,9 +92,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         items = [
             "Pick",
             "Saw",
-            "Stag Beetle",
-            "Beetle",
-            "Comic Book"
+            # These items are currently vanilla.
+            #"Stag Beetle",
+            #"Beetle",
+            #"Comic Book"
         ]
         return has_all([has_completed_cardon_forest(), has_all_items(items)])
 
@@ -262,7 +263,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
-                    ExitData("Support Car / R&D Room (Gift Flower)", has_item("Flower")),
+                    ExitData("Support Car / R&D Room (Gift Flower)"), #, has_item("Flower")), - Flower is currently vanilla.
                     ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
                     ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring")),
                     ExitData("Flutter - Roll's Room", has_completed_lake_jyun()),
