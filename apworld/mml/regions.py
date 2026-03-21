@@ -56,14 +56,14 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     def has_item(item_name: str) -> Callable[[CollectionState], bool]:
         return lambda state: state.has(item_name, world.player)
     
+    def has_any(bool_func_list: list[Callable[[CollectionState], bool]]) -> Callable[[CollectionState], bool]:
+        return lambda state: any([f(state) for f in bool_func_list])
+    
     def has_all(bool_func_list: list[Callable[[CollectionState], bool]]=[]) -> Callable[[CollectionState], bool]:
         return lambda state: all([f(state) for f in bool_func_list])
     
     def has_all_items(item_names:list[str]=[]) -> Callable[[CollectionState], bool]:
         return has_all([has_item(item_name) for item_name in item_names])
-    
-    def has_any(bool_func_list: list[Callable[[CollectionState], bool]]) -> Callable[[CollectionState], bool]:
-        return lambda state: any([f(state) for f in bool_func_list])
     
     def has_jump_springs() -> Callable[[CollectionState], bool]:
         return has_item("Spring Set")
@@ -149,10 +149,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         return has_all([has_cardon_forest_keys()])
     
     def has_completed_lake_jyun() -> Callable[[CollectionState], bool]:
-        return has_all([has_cardon_forest_keys(), has_jump_springs(), has_lake_jyun_keys()])
+        return has_all([has_completed_cardon_forest(), has_jump_springs(), has_lake_jyun_keys()])
     
     def has_completed_clozer_woods() -> Callable[[CollectionState], bool]:
-        return has_all([has_cardon_forest_keys(), has_completed_lake_jyun(), has_clozer_woods_keys(), has_explosive_wep()])
+        return has_all([has_completed_cardon_forest(), has_completed_lake_jyun(), has_clozer_woods_keys(), has_explosive_wep()])
 
     # Current Assumptions:
     # - Yellow Refractor = No requirement b/c cardon keys aren't randomized
@@ -512,7 +512,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("City Hall - Police Station"),
-                    ExitData("City Hall - Inspector's Office (Turn in Bag)", has_item("Bag"))
+                    ExitData("City Hall - Inspector's Office (Turn in Bag)", has_all([has_completed_lake_jyun(), has_item("Bag")]))
                 ]
             ),
         "City Hall - Inspector's Office (Turn in Bag)": 
