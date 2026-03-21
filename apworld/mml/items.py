@@ -38,7 +38,7 @@ ITEM_DATA_DICT = {
     "'Watcher' Key"                     : ItemData(0x0237, ItemClassification.progression,                             "Sub-City Key"              ),
     "'Sleeper' Key"                     : ItemData(0x0238, ItemClassification.progression,                             "Sub-City Key"              ),
     "'Dreamer' Key"                     : ItemData(0x0239, ItemClassification.progression,                             "Sub-City Key"              ),
-    "Flower"                            : ItemData(0x0244, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
+   #"Flower"                            : ItemData(0x0244, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
     "Bag"                               : ItemData(0x0245, ItemClassification.progression,                             None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
     "Pick"                              : ItemData(0x0247, ItemClassification.progression,                             None,                       ), # SIDEQUESTS NOT IMPLEMENTED YET
     "Saw"                               : ItemData(0x0248, ItemClassification.progression,                             None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
@@ -51,9 +51,9 @@ ITEM_DATA_DICT = {
     "Shiny Object"                      : ItemData(0x0250, ItemClassification.progression,                             "Museum"                    ),
     "Old Shield"                        : ItemData(0x0251, ItemClassification.progression,                             "Museum"                    ),
     "Shiny Red Stone"                   : ItemData(0x0252, ItemClassification.progression,                             "Museum"                    ),
-    "Stag Beetle"                       : ItemData(0x0253, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
-    "Beetle"                            : ItemData(0x0254, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
-    "Comic Book"                        : ItemData(0x0255, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
+   #"Stag Beetle"                       : ItemData(0x0253, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
+   #"Beetle"                            : ItemData(0x0254, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
+   #"Comic Book"                        : ItemData(0x0255, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
     "Ring"                              : ItemData(0x0256, ItemClassification.progression,                             None                        ),
     "Mine Parts Kit"                    : ItemData(0x0258, ItemClassification.filler,                                  None                        ),
     "Cannon Kit"                        : ItemData(0x0259, ItemClassification.progression,                             None                        ),
