@@ -75,7 +75,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         return has_item("Bomb Schematic")
     
     def can_destroy_cracked_walls() -> Callable[[CollectionState], bool]:
-        return has_all([has_drill_arm(), has_grand_grenade()])
+        return has_any([has_drill_arm(), has_grand_grenade()])
 
     def has_jet_skates() -> Callable[[CollectionState], bool]:
         return has_all_items(["Rollerboard", "Old Hoverjets"])
