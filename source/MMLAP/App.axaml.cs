@@ -6,10 +6,13 @@ using Archipelago.Core.Helpers;
 using Archipelago.Core.Models;
 using Archipelago.Core.Util;
 using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
+using DynamicData;
 using MMLAP.Helpers;
 using MMLAP.Models;
 using Newtonsoft.Json;
@@ -17,9 +20,13 @@ using ReactiveUI;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reflection;
 using System.Security.Principal;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Timers;
 using static MMLAP.Models.MMLEnums;
 
@@ -28,8 +35,8 @@ namespace MMLAP;
 public partial class App : Application
 {
     // TODO: Remember to set this in MMLAP.Desktop as well.
-    public static readonly string Version = "0.2.1";
-    public static readonly List<string> SupportedVersions = ["0.2.0", "0.2.1"];
+    public static readonly string Version = "0.2.2";
+    public static readonly List<string> SupportedVersions = ["0.2.0", "0.2.1", "0.2.2"];
 
     public static MainWindowViewModel? Context;
     public static ArchipelagoClient? APClient { get; set; }
@@ -48,6 +55,7 @@ public partial class App : Application
     private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
     private static bool IsReceivingItemsAfterLoad { get; set; } = false;
+    private static readonly object _lockObject = new object();
 
     public override void Initialize()
     {
@@ -83,6 +91,30 @@ public partial class App : Application
         return principal.IsInRole(WindowsBuiltInRole.Administrator);
     }
 
+    /**
+     * Returns a Dictionary of details from the most recent connection.
+     * 
+     * File path is ./connection.json.
+     * 
+     * @return A Dictionary with the most recent connection, with keys of host and slot.
+     */
+    public static Dictionary<String, String> GetLastConnectionDetails()
+    {
+        string connectionDetails = File.ReadAllText(@"./connection.json");
+        return System.Text.Json.JsonSerializer.Deserialize<Dictionary<String, String>>(connectionDetails);
+    }
+
+    /**
+     * Saves a details from the most recent connection to ./connection.json.
+     * 
+     * @param A Dictionary with the most recent connection, with keys of host and slot.
+     */
+    public static void SaveLastConnectionDetails(Dictionary<String, String> lastConnectionDetails)
+    {
+        string json = System.Text.Json.JsonSerializer.Serialize(lastConnectionDetails);
+        File.WriteAllText(@"./connection.json", json);
+    }
+
     public void Start()
     {
         Context = new MainWindowViewModel("0.6.3 or later");
@@ -93,6 +125,29 @@ public partial class App : Application
         Context.OverlayEnabled = true;
         Context.AutoscrollEnabled = true;
         Context.ConnectButtonEnabled = true;
+
+        Dictionary<String, String> lastConnectionDetails = new Dictionary<string, string>();
+        lastConnectionDetails["slot"] = "";
+        lastConnectionDetails["host"] = "";
+        // Don't save password.
+        try
+        {
+            lastConnectionDetails = GetLastConnectionDetails();
+            if (!lastConnectionDetails.ContainsKey("slot"))
+            {
+                lastConnectionDetails["slot"] = "";
+            }
+            if (!lastConnectionDetails.ContainsKey("host"))
+            {
+                lastConnectionDetails["host"] = "";
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Logger.Verbose($"Could not load connection details file.\r\n{ex.ToString()}");
+        }
+        Context.Host = lastConnectionDetails["host"];
+        Context.Slot = lastConnectionDetails["slot"];
 
         HasSubmittedGoal = false;
 
@@ -310,6 +365,22 @@ public partial class App : Application
 
             Log.Logger.Information("Connected to Archipelago");
             Log.Logger.Information($"Playing {APClient.CurrentSession.ConnectionInfo.Game} as {APClient.CurrentSession.Players.GetPlayerName(APClient.CurrentSession.ConnectionInfo.Slot)}");
+
+            Dictionary<String, String> lastConnectionDetails = new Dictionary<string, string>();
+            lastConnectionDetails["slot"] = Context.Slot;
+            lastConnectionDetails["host"] = Context.Host;
+            try
+            {
+                SaveLastConnectionDetails(lastConnectionDetails);
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Verbose($"Failed to write connection details\r\n{ex.ToString()}");
+            }
+            // Repopulate hint list.  There is likely a better way to do this using the Get network protocol
+            // with keys=[$"hints_{team}_{slot}"].
+            APClient?.SendMessage("!hint");
+            UpdateItemLog();
         }
         return;
     }
@@ -337,6 +408,120 @@ public partial class App : Application
             _ = APClient.ReceiveReady();
         }
         return;
+    }
+
+    /**
+     * Adds a hint message to the Hints tab.
+     * 
+     * @param message The message with the hint.
+     */
+    private static void LogHint(LogMessage message)
+    {
+        var newMessage = message.Parts.Select(x => x.Text);
+        List<TextSpan> spans = new List<TextSpan>();
+
+        LogListItem? updatedHint = null;
+
+        foreach (var hint in Context.HintList)
+        {
+            IEnumerable<string> hintText = hint.TextSpans.Select(y => y.Text);
+            if (newMessage.Count() != hintText.Count())
+            {
+                continue;
+            }
+            bool isMatch = true;
+            for (int i = 0; i < hintText.Count(); i++)
+            {
+                if (newMessage.ElementAt(i) != hintText.ElementAt(i) && newMessage.ElementAt(i).Trim() != "(found)")
+                {
+                    isMatch = false;
+                    break;
+                }
+                else if (newMessage.ElementAt(i).Trim() == "(found)")
+                {
+                    updatedHint = hint;
+                    break;
+                }
+            }
+            if (updatedHint != null)
+            {
+                break;
+            }
+            if (isMatch)
+            {
+                return; // Hint already in list
+            }
+        }
+        foreach (var part in message.Parts)
+        {
+            RxApp.MainThreadScheduler.Schedule(() =>
+            {
+                spans.Add(new TextSpan() { Text = part.Text, TextColor = new SolidColorBrush(Avalonia.Media.Color.FromRgb(part.Color.R, part.Color.G, part.Color.B)) });
+            });
+        }
+        lock (_lockObject)
+        {
+            RxApp.MainThreadScheduler.Schedule(() =>
+            {
+                if (updatedHint == null)
+                {
+                    Context.HintList.Add(new LogListItem(spans));
+                }
+                else
+                {
+                    Context.HintList.Replace(updatedHint, new LogListItem(spans));
+                }
+            });
+        }
+    }
+
+    /**
+     * Updates the Received Items tab.  Unlike the Hints tab, rewrites the list each time.
+     */
+    private static void UpdateItemLog()
+    {
+        Dictionary<string, int> itemCount = new Dictionary<string, int>();
+        List<LogListItem> messagesToLog = new List<LogListItem>();
+        if (APClient != null && APClient.CurrentSession != null && APClient.CurrentSession.Items != null)
+        {
+            foreach (ItemInfo item in APClient.CurrentSession.Items.AllItemsReceived)
+            {
+                string itemName = item.ItemName;
+                if (itemCount.ContainsKey(itemName))
+                {
+                    itemCount[itemName] = itemCount[itemName] + 1;
+                }
+                else
+                {
+                    itemCount[itemName] = 1;
+                }
+            }
+            RxApp.MainThreadScheduler.Schedule(() =>
+            {
+                List<string> sortedItems = itemCount.Keys.ToList();
+                sortedItems.Sort();
+                foreach (string item in sortedItems)
+                {
+                    messagesToLog.Add(new LogListItem(
+                        new List<TextSpan>() {
+                            new TextSpan() { Text = $"{item}: ", TextColor = new SolidColorBrush(Avalonia.Media.Color.FromRgb(200, 255, 200)) },
+                            new TextSpan() { Text = $"{itemCount[item]}", TextColor = new SolidColorBrush(Avalonia.Media.Color.FromRgb(200, 255, 200)) }
+                        }
+                    ));
+                }
+            });
+        }
+        lock (_lockObject)
+        {
+            RxApp.MainThreadScheduler.Schedule(() =>
+            {
+                Context.ItemList.Clear();
+                foreach (LogListItem messageToLog in messagesToLog)
+                {
+                    Context.ItemList.Add(messageToLog);
+                }
+            });
+        }
     }
 
     private static async void ModifyGameLoop(object? sender, ElapsedEventArgs e)
@@ -626,6 +811,7 @@ public partial class App : Application
         )
         {
             ItemHelpers.ReceiveGenericItem(itemData);
+            UpdateItemLog();
             Log.Logger.Debug($"Item Received: {JsonConvert.SerializeObject(args.Item)}");
         }
         return;
@@ -633,6 +819,10 @@ public partial class App : Application
 
     private static async void Client_MessageReceived(object? sender, MessageReceivedEventArgs e)
     {
+        if (e.Message.Parts.Any(x => x.Text == "[Hint]: "))
+        {
+            LogHint(e.Message);
+        }
         Log.Logger.Information(JsonConvert.SerializeObject(e.Message));
         return;
     }
