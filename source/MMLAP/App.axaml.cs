@@ -28,8 +28,8 @@ namespace MMLAP;
 public partial class App : Application
 {
     // TODO: Remember to set this in MMLAP.Desktop as well.
-    public static readonly string Version = "0.2.0";
-    public static readonly List<string> SupportedVersions = ["0.2.0"];
+    public static readonly string Version = "0.2.1";
+    public static readonly List<string> SupportedVersions = ["0.2.0", "0.2.1"];
 
     public static MainWindowViewModel? Context;
     public static ArchipelagoClient? APClient { get; set; }
@@ -427,7 +427,10 @@ public partial class App : Application
                                     break;
                                 case { RoomName: "Downtown" }:
                                     // Handle library pail in case player can't trigger worker dialogue because they already have the Saw
-                                    if (Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber ?? 0))
+                                    if (
+                                        Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber??0) ||
+                                        Memory.ReadBit(Addresses.TurnedInSaw.Address, Addresses.TurnedInSaw.BitNumber??5)
+                                    )
                                     {
                                         Memory.WriteBit(Addresses.SawPailIsReady.Address, Addresses.SawPailIsReady.BitNumber ?? 7, true);
                                     }

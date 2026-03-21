@@ -56,14 +56,14 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     def has_item(item_name: str) -> Callable[[CollectionState], bool]:
         return lambda state: state.has(item_name, world.player)
     
+    def has_any(bool_func_list: list[Callable[[CollectionState], bool]]) -> Callable[[CollectionState], bool]:
+        return lambda state: any([f(state) for f in bool_func_list])
+    
     def has_all(bool_func_list: list[Callable[[CollectionState], bool]]=[]) -> Callable[[CollectionState], bool]:
         return lambda state: all([f(state) for f in bool_func_list])
     
     def has_all_items(item_names:list[str]=[]) -> Callable[[CollectionState], bool]:
         return has_all([has_item(item_name) for item_name in item_names])
-    
-    def has_any(bool_func_list: list[Callable[[CollectionState], bool]]) -> Callable[[CollectionState], bool]:
-        return lambda state: any([f(state) for f in bool_func_list])
     
     def has_jump_springs() -> Callable[[CollectionState], bool]:
         return has_item("Spring Set")
@@ -75,7 +75,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         return has_item("Bomb Schematic")
     
     def can_destroy_cracked_walls() -> Callable[[CollectionState], bool]:
-        return has_all([has_drill_arm(), has_grand_grenade()])
+        return has_any([has_drill_arm(), has_grand_grenade()])
 
     def has_jet_skates() -> Callable[[CollectionState], bool]:
         return has_all_items(["Rollerboard", "Old Hoverjets"])
@@ -149,10 +149,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         return has_all([has_cardon_forest_keys()])
     
     def has_completed_lake_jyun() -> Callable[[CollectionState], bool]:
-        return has_all([has_cardon_forest_keys(), has_jump_springs(), has_lake_jyun_keys()])
+        return has_all([has_completed_cardon_forest(), has_jump_springs(), has_lake_jyun_keys()])
     
     def has_completed_clozer_woods() -> Callable[[CollectionState], bool]:
-        return has_all([has_cardon_forest_keys(), has_completed_lake_jyun(), has_clozer_woods_keys(), has_explosive_wep()])
+        return has_all([has_completed_cardon_forest(), has_completed_lake_jyun(), has_clozer_woods_keys(), has_explosive_wep()])
 
     # Current Assumptions:
     # - Yellow Refractor = No requirement b/c cardon keys aren't randomized
@@ -512,7 +512,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("City Hall - Police Station"),
-                    ExitData("City Hall - Inspector's Office (Turn in Bag)", has_item("Bag"))
+                    ExitData("City Hall - Inspector's Office (Turn in Bag)", has_all([has_completed_lake_jyun(), has_item("Bag")]))
                 ]
             ),
         "City Hall - Inspector's Office (Turn in Bag)": 
@@ -945,7 +945,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Cardon Forest Sub-Gate - Refractor Room (Upper)": 
             GameRegionData(
                 [
-
+                    #"Cardon Forest Sub-Gate, Jakko nest starter key get"
                 ],
                 [
                     ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Sub-Gate Exit)"),
@@ -957,7 +957,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     "Cardon Forest Sub-Gate, Sharukurusu floor hole",
                     "Cardon Forest Sub-Gate, Cliff hole",
-                    "Cardon Forest Sub-Gate, Cliff chest"
+                    "Cardon Forest Sub-Gate, Cliff chest",
+                    #"Cardon Forest Sub-Gate, Three switch starter key get"
                 ],
                 [
                     ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower)"),
@@ -969,7 +970,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     "Cardon Forest Sub-Gate, Bottom conveyor hole",
                     "Cardon Forest Sub-Gate, Middle conveyor hole",
-                    "Cardon Forest Sub-Gate, Middle switch chest"
+                    "Cardon Forest Sub-Gate, Middle switch chest",
+                    #"Cardon Forest Sub-Gate, Conveyor chest starter key get"
                 ],
                 [
                     ExitData("Cardon Forest Sub-Gate - Cliff Room") # Technically three exits
@@ -1519,7 +1521,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Shekuten + Kuruguru Area (Shekuten Lower)": 
             GameRegionData(
                 [
-                    "Underground ruins, Shekuten pillar room hole"
+                    "Underground ruins, Shekuten platform room hole"
                 ],
                 [
                     ExitData("Underground Ruins - Spinning Tower Trap Area (Arukoitan Battle + Hanmuru Doll)"),
@@ -1530,7 +1532,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Shekuten + Kuruguru Area (Kuruguru Upper)": 
             GameRegionData(
                 [
-                    "Underground ruins, Shekuten pillar room chest",
+                    "Underground ruins, Shekuten platform room chest",
                     "Underground ruins, Kuruguru obstacle hole"
                 ],
                 [

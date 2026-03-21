@@ -9,7 +9,7 @@ namespace MMLAP.Models
         LevelData? levelData,
         ItemData? defaultItemData,
         AddressData checkAddressData,
-        byte? checkByteValue,
+        string? checkValue,
         bool isMissable = false,
         ulong? chestItemSignatureAddress = null,
         ulong? textBoxStartAddress = null
@@ -21,7 +21,7 @@ namespace MMLAP.Models
         public LevelData? LevelData { get; set; } = levelData;
         public ItemData? DefaultItemData { get; set; } = defaultItemData;
         public AddressData CheckAddressData { get; set; } = checkAddressData;
-        public byte? CheckByteValue { get; set; } = checkByteValue;
+        public string? CheckValue { get; set; } = checkValue;
         public bool IsMissable { get; set; } = isMissable;
         public ulong? ChestItemSignatureAddress { get; set; } = chestItemSignatureAddress;
         public ulong? TextBoxStartAddress { get; set; } = textBoxStartAddress;

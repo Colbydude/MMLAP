@@ -408,8 +408,8 @@ namespace MMLAP.Helpers
                 { 32,  new LocationData(32,  "Underground ruins, Arukoitan battle south chest",               LocationCategory.Container, levelDataDict[0x0904], itemDataDict[0x811C], new AddressData(0xBE404, 7, null), null, false, 0x9F4D4, 0x8C759)  },
                 { 33,  new LocationData(33,  "Underground ruins, Obstacle room cliff east hole",              LocationCategory.Hole,      levelDataDict[0x0904], itemDataDict[0x804E], new AddressData(0xBE3DF, 2, null), null, false, null,    0x153AB8) },
                 { 34,  new LocationData(34,  "Underground ruins, Obstacle room cliff west hole",              LocationCategory.Hole,      levelDataDict[0x0904], itemDataDict[0x81C4], new AddressData(0xBE3DE, 1, null), null, false, null,    0x1536C4) },
-                { 35,  new LocationData(35,  "Underground ruins, Shekuten pillar room chest",                 LocationCategory.Container, levelDataDict[0x0905], itemDataDict[0x80A2], new AddressData(0xBE404, 5, null), null, false, 0x9F114, 0x8C759)  },
-                { 36,  new LocationData(36,  "Underground ruins, Shekuten pillar room hole",                  LocationCategory.Hole,      levelDataDict[0x0905], itemDataDict[0x0251], new AddressData(0xBE422, 6, null), null, false, null,    0x153800) },
+                { 35,  new LocationData(35,  "Underground ruins, Shekuten platform room chest",               LocationCategory.Container, levelDataDict[0x0905], itemDataDict[0x80A2], new AddressData(0xBE404, 5, null), null, false, 0x9F114, 0x8C759)  },
+                { 36,  new LocationData(36,  "Underground ruins, Shekuten platform room hole",                LocationCategory.Hole,      levelDataDict[0x0905], itemDataDict[0x0251], new AddressData(0xBE3DF, 7, null), null, false, null,    0x153800) },
                 { 37,  new LocationData(37,  "Underground ruins, Kuruguru obstacle hole",                     LocationCategory.Hole,      levelDataDict[0x0905], itemDataDict[0x0250], new AddressData(0xBE3DE, 2, null), null, false, null,    0x153655) },
                 { 38,  new LocationData(38,  "Underground ruins, Gold Gorubesshu chest",                      LocationCategory.Container, levelDataDict[0x0906], itemDataDict[0x0266], new AddressData(0xBE401, 6, null), null, false, 0x9F114, 0x8C735)  },
                 { 39,  new LocationData(39,  "Underground ruins, Drillable pillar room south chest",          LocationCategory.Container, levelDataDict[0x0906], itemDataDict[0x0265], new AddressData(0xBE402, 5, null), null, false, 0x9F4D4, 0x8C735)  },
@@ -421,7 +421,7 @@ namespace MMLAP.Helpers
                 { 45,  new LocationData(45,  "Underground ruins, Fireball Orudakoitan chest",                 LocationCategory.Container, levelDataDict[0x0907], itemDataDict[0x0259], new AddressData(0xBE403, 4, null), null, false, 0x9F114, 0x8C735)  },
                 { 46,  new LocationData(46,  "Underground ruins, Box ledge chest",                            LocationCategory.Container, levelDataDict[0x0907], itemDataDict[0x80C4], new AddressData(0xBE403, 2, null), null, false, null,    0x8C759)  },
                 { 47,  new LocationData(47,  "Underground ruins, Horokko ledge chest",                        LocationCategory.Container, levelDataDict[0x0907], itemDataDict[0x021D], new AddressData(0xBE403, 1, null), null, false, null,    0x8C735)  },
-                { 48,  new LocationData(48,  "Underground ruins, Clozer exit chest",                          LocationCategory.Container, levelDataDict[0x0908], itemDataDict[0x80B2], new AddressData(0xBE403, 3, null), null, false, 0x9FC54, 0x8C735)  },
+                { 48,  new LocationData(48,  "Underground ruins, Clozer exit chest",                          LocationCategory.Container, levelDataDict[0x0908], itemDataDict[0x80B2], new AddressData(0xBE403, 3, null), null, false, 0x9FC54, 0x8C759)  },
                 { 49,  new LocationData(49,  "Underground ruins, Drillable wall room middle cliff chest",     LocationCategory.Container, levelDataDict[0x0908], itemDataDict[0x0267], new AddressData(0xBE401, 2, null), null, false, 0x9F4D4, 0x8C735)  },
                 { 50,  new LocationData(50,  "Underground ruins, Drillable wall room west cliff chest",       LocationCategory.Container, levelDataDict[0x0908], itemDataDict[0x0274], new AddressData(0xBE400, 0, null), null, false, 0x9F114, 0x8C735)  },
                 { 51,  new LocationData(51,  "Underground ruins, Drillable wall room east cliff chest",       LocationCategory.Container, levelDataDict[0x0908], itemDataDict[0x0212], new AddressData(0xBE401, 1, null), null, false, 0x9F894, 0x8C735)  },
@@ -495,7 +495,7 @@ namespace MMLAP.Helpers
                 { 119, new LocationData(119, "Museum donation, Shiny Object",                                 LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, 2, null), null, false, null,    null)     },
                 { 120, new LocationData(120, "Museum donation, Old Shield",                                   LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, 1, null), null, false, null,    null)     },
                 { 121, new LocationData(121, "Museum donation, Shiny Red Stone",                              LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, 0, null), null, false, null,    null)     },
-                { 122, new LocationData(122, "Complete the Museum exhibit",                                   LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, null, 1), null, false, null,    null)     },
+                { 122, new LocationData(122, "Complete the Museum exhibit",                                   LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, null, 1), "255", false, null,    null)     },
                 { 123, new LocationData(123, "Take dangerous object from museum visitor",                     LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x026B], new AddressData(0xBE37D, 0, null), null, false, null,    0x155387) },
                 { 124, new LocationData(124, "Gift Flower to Roll",                                           LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 7, null), null, false, null,    null)     },
                 { 125, new LocationData(125, "Gift Music Box to Roll",                                        LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 6, null), null, false, null,    null)     },
@@ -512,7 +512,8 @@ namespace MMLAP.Helpers
             foreach (LocationData locationData in locationDataDict.Values)
             {
                 // TODO: Make locations depend on options
-                if (locationData.CheckAddressData.BitNumber is not null) {
+                if (locationData.CheckAddressData.BitNumber is not null)
+                {
                     Location location = new()
                     {
                         Id = locationData.Id,
@@ -520,6 +521,19 @@ namespace MMLAP.Helpers
                         Address = locationData.CheckAddressData.Address,
                         CheckType = LocationCheckType.Bit,
                         AddressBit = locationData.CheckAddressData.BitNumber ?? -1,
+                        Category = locationData.Category.ToString()
+                    };
+                    locationList.Add(location);
+                }
+                else if (locationData.CheckValue != null)
+                {
+                    Location location = new()
+                    {
+                        Id = locationData.Id,
+                        Name = locationData.Name,
+                        Address = locationData.CheckAddressData.Address,
+                        CheckType = LocationCheckType.Byte,
+                        CheckValue = locationData.CheckValue ?? "255",
                         Category = locationData.Category.ToString()
                     };
                     locationList.Add(location);
