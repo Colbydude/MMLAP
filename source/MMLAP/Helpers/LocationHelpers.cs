@@ -495,7 +495,7 @@ namespace MMLAP.Helpers
                 { 119, new LocationData(119, "Museum donation, Shiny Object",                                 LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, 2, null), null, false, null,    null)     },
                 { 120, new LocationData(120, "Museum donation, Old Shield",                                   LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, 1, null), null, false, null,    null)     },
                 { 121, new LocationData(121, "Museum donation, Shiny Red Stone",                              LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, 0, null), null, false, null,    null)     },
-                { 122, new LocationData(122, "Complete the Museum exhibit",                                   LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, null, 1), null, false, null,    null)     },
+                { 122, new LocationData(122, "Complete the Museum exhibit",                                   LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x00FF], new AddressData(0xBE37F, null, 1), "255", false, null,    null)     },
                 { 123, new LocationData(123, "Take dangerous object from museum visitor",                     LocationCategory.Quest,     levelDataDict[0x1C01], itemDataDict[0x026B], new AddressData(0xBE37D, 0, null), null, false, null,    0x155387) },
                 { 124, new LocationData(124, "Gift Flower to Roll",                                           LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 7, null), null, false, null,    null)     },
                 { 125, new LocationData(125, "Gift Music Box to Roll",                                        LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 6, null), null, false, null,    null)     },
@@ -512,7 +512,8 @@ namespace MMLAP.Helpers
             foreach (LocationData locationData in locationDataDict.Values)
             {
                 // TODO: Make locations depend on options
-                if (locationData.CheckAddressData.BitNumber is not null) {
+                if (locationData.CheckAddressData.BitNumber is not null)
+                {
                     Location location = new()
                     {
                         Id = locationData.Id,
@@ -520,6 +521,19 @@ namespace MMLAP.Helpers
                         Address = locationData.CheckAddressData.Address,
                         CheckType = LocationCheckType.Bit,
                         AddressBit = locationData.CheckAddressData.BitNumber ?? -1,
+                        Category = locationData.Category.ToString()
+                    };
+                    locationList.Add(location);
+                }
+                else if (locationData.CheckValue != null)
+                {
+                    Location location = new()
+                    {
+                        Id = locationData.Id,
+                        Name = locationData.Name,
+                        Address = locationData.CheckAddressData.Address,
+                        CheckType = LocationCheckType.Byte,
+                        CheckValue = locationData.CheckValue ?? "255",
                         Category = locationData.Category.ToString()
                     };
                     locationList.Add(location);
