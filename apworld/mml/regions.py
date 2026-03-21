@@ -945,7 +945,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Cardon Forest Sub-Gate - Refractor Room (Upper)": 
             GameRegionData(
                 [
-
+                    #"Cardon Forest Sub-Gate, Jakko nest starter key get"
                 ],
                 [
                     ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Sub-Gate Exit)"),
@@ -957,7 +957,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     "Cardon Forest Sub-Gate, Sharukurusu floor hole",
                     "Cardon Forest Sub-Gate, Cliff hole",
-                    "Cardon Forest Sub-Gate, Cliff chest"
+                    "Cardon Forest Sub-Gate, Cliff chest",
+                    #"Cardon Forest Sub-Gate, Three switch starter key get"
                 ],
                 [
                     ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower)"),
@@ -969,7 +970,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     "Cardon Forest Sub-Gate, Bottom conveyor hole",
                     "Cardon Forest Sub-Gate, Middle conveyor hole",
-                    "Cardon Forest Sub-Gate, Middle switch chest"
+                    "Cardon Forest Sub-Gate, Middle switch chest",
+                    #"Cardon Forest Sub-Gate, Conveyor chest starter key get"
                 ],
                 [
                     ExitData("Cardon Forest Sub-Gate - Cliff Room") # Technically three exits
@@ -1519,7 +1521,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Shekuten + Kuruguru Area (Shekuten Lower)": 
             GameRegionData(
                 [
-                    "Underground ruins, Shekuten pillar room hole"
+                    "Underground ruins, Shekuten platform room hole"
                 ],
                 [
                     ExitData("Underground Ruins - Spinning Tower Trap Area (Arukoitan Battle + Hanmuru Doll)"),
@@ -1530,7 +1532,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Shekuten + Kuruguru Area (Kuruguru Upper)": 
             GameRegionData(
                 [
-                    "Underground ruins, Shekuten pillar room chest",
+                    "Underground ruins, Shekuten platform room chest",
                     "Underground ruins, Kuruguru obstacle hole"
                 ],
                 [
