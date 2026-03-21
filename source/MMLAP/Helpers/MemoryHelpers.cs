@@ -1,9 +1,4 @@
 ﻿using Archipelago.Core.Util;
-using MMLAP.Models;
-using static MMLAP.Models.MMLEnums;
-using System;
-using System.Collections.Generic;
-using ImGuiNET;
 
 namespace MMLAP.Helpers
 {

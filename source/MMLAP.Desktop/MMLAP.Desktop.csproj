@@ -18,7 +18,6 @@
     <ApplicationDisplayVersion>0.2.0</ApplicationDisplayVersion>
     <ApplicationVersion>0.2.0</ApplicationVersion>
     <Version>0.2.0</Version>
-	  <ApplicationManifest>app.manifest</ApplicationManifest>
     <!-- Single File Publishing Properties -->
     <PublishSingleFile>true</PublishSingleFile>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
