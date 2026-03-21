@@ -30,13 +30,15 @@
   - Saving the missing woman
   - Curing Ira's illness
   - Turning in gift items to Roll
+  - Finding the Saw
+  - Finding and turning in the missing bag
 
 ### Items
 Any item associated with a location above. At the moment, this includes:
-- All keys
-- Most items needed to craft items (Jump Springs, Drill Arm, Jet Skates, etc.)
+- All sub-gate and sub-city keys
+- Most items needed to craft other items (Jump Springs, Drill Arm, Jet Skates, etc.)
 - Non-shop buster parts
-- Most museum items
+- Most museum items (except the Old Heater)
 
 ### Completion Goals
 - Defeat Juno
