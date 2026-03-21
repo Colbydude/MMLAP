@@ -174,7 +174,7 @@ def create_all_items(world: GameWorld) -> None:
         item_name_locked_count = locked_counts.get(item_name, 0)
         if ITEM_NAME_TO_CATEGORY.get(item_name) != ItemClassification.filler:
             item_name_locked_count = 0
-        to_add = add_count - item_name_locked_count
+        quantity_to_add = add_count - item_name_locked_count
         if quantity_to_add < 0:
             quantity_to_add = 0
         for _ in range(quantity_to_add):
