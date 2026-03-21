@@ -28,18 +28,26 @@ namespace MMLAP;
 public partial class App : Application
 {
     // TODO: Remember to set this in MMLAP.Desktop as well.
-    public static string Version = "0.1.0";
-    public static List<string> SupportedVersions = ["0.1.0"];
+    public static readonly string Version = "0.2.0";
+    public static readonly List<string> SupportedVersions = ["0.2.0"];
 
-    public static MainWindowViewModel Context;
-    public static ArchipelagoClient APClient { get; set; }
-    public static List<ILocation> GameLocations { get; set; }
-    public static Dictionary<long, ItemData> scoutedLocationItemData { get; set; }
-    private static string _playerName { get; set; }
-    private static bool _hasSubmittedGoal { get; set; }
-    private static Timer _gameLoopTimer { get; set; }
-
-    private static Timer _startMMLTimer { get; set; }
+    public static MainWindowViewModel? Context;
+    public static ArchipelagoClient? APClient { get; set; }
+    private static Dictionary<ushort, LevelData> LevelDataDict { get; set; } = LocationHelpers.GetLevelDataDict();
+    private static Dictionary<long, ItemData> ItemDataDict { get; set; } = LocationHelpers.GetItemDataDict();
+    private static Dictionary<int, LocationData> LocationDataDict { get; set; } = LocationHelpers.GetLocationDataDict();
+    private static Dictionary<long, ItemData>? ScoutedLocationItemData { get; set; }
+    private static List<ILocation>? GameLocations { get; set; }
+    private static string? PlayerName { get; set; }
+    private static bool HasSubmittedGoal { get; set; } = false;
+    private static Timer? GameLoopTimer { get; set; }
+    private static int IsGameLoopRunning = 0;
+    private static Timer? StartMMLTimer { get; set; }
+    private static TextData? OverwrittenTextData { get; set; }
+    private static ushort? PreviousLevelID { get; set; }
+    private static bool IsManagingLevelChange { get; set; } = false;
+    private static bool IsPreviouslyInTitleScreen { get; set; } = false;
+    private static bool IsReceivingItemsAfterLoad { get; set; } = false;
 
     public override void Initialize()
     {
@@ -86,7 +94,7 @@ public partial class App : Application
         Context.AutoscrollEnabled = true;
         Context.ConnectButtonEnabled = true;
 
-        _hasSubmittedGoal = false;
+        HasSubmittedGoal = false;
 
         Log.Logger.Information("This Archipelago Client is compatible only with the NTSC-U release of Mega Man Legends.");
         Log.Logger.Information("Trying to play with a different version will not work as intended.");
@@ -95,6 +103,7 @@ public partial class App : Application
             Log.Logger.Warning("You do not appear to be running this client as an administrator.");
             Log.Logger.Warning("This may result in errors or crashes when trying to connect to Duckstation.");
         }
+        Log.Logger.Information("Please report any issues in the Discord thread. Thank you!");
         return;
     }
 
@@ -108,7 +117,14 @@ public partial class App : Application
         string command = a.Command.Trim().ToLower();
         switch (command)
         {
-            case "reload":
+            case "!help":
+                Log.Logger.Information($"> {a.Command}");
+                Log.Logger.Information("Available commands:");
+                Log.Logger.Information("!help - Show this help message.");
+                Log.Logger.Information("!reload - Force reload all items.  Use this if you think you may have missed received items.  Please reconnect to the server while in game to refresh received items.");
+                Log.Logger.Information("!goal - Check your current goal.");
+                break;
+            case "!reload":
                 Log.Logger.Information($"> {a.Command}");
                 if (APClient != null && APClient.ItemManager != null)
                 {
@@ -121,7 +137,7 @@ public partial class App : Application
                     Log.Logger.Warning("Please connect the client before attempting reload.");
                 }
                 break;
-            case "goal":
+            case "!goal":
                 Log.Logger.Information($"> {a.Command}");
                 string goalText;
                 if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goalValueObj))
@@ -212,17 +228,15 @@ public partial class App : Application
         APClient.MessageReceived += Client_MessageReceived;
 
         // Connect to host and log in to slot => init Options, ItemManager, LocationManager
-        if (e.Host != null) {
-            await APClient.Connect(e.Host, "Mega Man Legends");
-        }
+        await APClient.Connect((e.Host??"localhost:38281").Trim(), "Mega Man Legends");
         if (!APClient.IsConnected)
         {
             Log.Logger.Error("Your host seems to be invalid.  Please confirm that you have entered it correctly.");
             Context.ConnectButtonEnabled = true;
             return;
         }
-        _playerName = e.Slot;
-        await APClient.Login(_playerName, !string.IsNullOrWhiteSpace(e.Password) ? e.Password : null);
+        PlayerName = e.Slot??"".Trim();
+        await APClient.Login(PlayerName, !string.IsNullOrWhiteSpace(e.Password) ? e.Password : null);
         if (!APClient.IsLoggedIn)
         {
             Log.Logger.Error("Failed to login.  Please check your host, name, and password.");
@@ -246,9 +260,8 @@ public partial class App : Application
         long[] locationIds = GameLocations.Select(loc => (long)loc.Id).ToArray();
         ArchipelagoSession session = APClient.CurrentSession;
         Dictionary<long, ScoutedItemInfo> scoutedLocations = await session.Locations.ScoutLocationsAsync(locationIds);
-        Dictionary<long, ItemData> itemDataDict = LocationHelpers.GetItemDataDict();
-        scoutedLocationItemData = scoutedLocations.Keys.ToDictionary(
-            locationId => locationId, locationId => scoutedLocations[locationId].Player.Slot == slot ? itemDataDict[scoutedLocations[locationId].ItemId] : itemDataDict[0]
+        ScoutedLocationItemData = scoutedLocations.Keys.ToDictionary(
+            locationId => locationId, locationId => scoutedLocations[locationId].Player.Slot == slot ? ItemDataDict[scoutedLocations[locationId].ItemId] : ItemDataDict[0]
         );
 
         // Check apworld version compatibility with host and log results
@@ -279,83 +292,257 @@ public partial class App : Application
         return;
     }
 
-    private void LocationManager_LocationCompleted(object? sender, LocationCompletedEventArgs e)
+    private static async void Client_Connected(object? sender, EventArgs args)
     {
-        if (APClient.LocationManager != null && APClient.CurrentSession != null)
+        if (APClient != null)
         {
-            // Use scouted location item to rewrite textbox
-            Dictionary<int, LocationData> locationDataDict = LocationHelpers.GetLocationDataDict();
-            LocationData locationData = locationDataDict[e.CompletedLocation.Id];
-            if (locationData.TextBoxStartAddress != null)
-            {
-                ItemData itemData = scoutedLocationItemData[e.CompletedLocation.Id];
-                Memory.WriteByteArray(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData)); // TODO: Is this big endian?
-            }
+            // Ensure player is in game before starting gameplay loop
+            StartMMLTimer = new Timer();
+            StartMMLTimer.Elapsed += new ElapsedEventHandler(StartMMLGame);
+            StartMMLTimer.Interval = 5000;
+            StartMMLTimer.Enabled = true;
+
+            // Start gameplay loop
+            GameLoopTimer = new Timer();
+            GameLoopTimer.Elapsed += new ElapsedEventHandler(ModifyGameLoop);
+            GameLoopTimer.Interval = 500;
+            GameLoopTimer.Enabled = true;
+
+            Log.Logger.Information("Connected to Archipelago");
+            Log.Logger.Information($"Playing {APClient.CurrentSession.ConnectionInfo.Game} as {APClient.CurrentSession.Players.GetPlayerName(APClient.CurrentSession.ConnectionInfo.Slot)}");
         }
         return;
     }
-
-    private static bool LocationManager_EnableLocationsCondition()
+    
+    private static async void Client_Disconnected(object? sender, EventArgs args)
     {
-        bool[] conditions = [
-            !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber??0),
-            !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber??0),
-            //!Memory.ReadBit(Addresses.DungeonMapFlag.Address, Addresses.DungeonMapFlag.BitNumber??0),
-            //!Memory.ReadBit(Addresses.PauseMenuFlag.Address, Addresses.PauseMenuFlag.BitNumber??0),
-            !Memory.ReadBit(Addresses.CameraAlteredFlag.Address, Addresses.CameraAlteredFlag.BitNumber??0),
-            !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber??0),
-            Memory.ReadByte(Addresses.TitleScreen.Address) == 0xA4
-        ];
-        return conditions.All(value => value);
-    }
-
-    private static void ItemManager_ItemReceived(object? sender, ItemReceivedEventArgs args)
-    {
-        Dictionary<long, ItemData> itemDataDict = LocationHelpers.GetItemDataDict();
-        if (APClient.CurrentSession != null && itemDataDict.TryGetValue(args.Item.Id, out ItemData? itemData))
-        {
-            ItemHelpers.ReceiveGenericItem(itemData);
-            Log.Logger.Debug($"Item Received: {JsonConvert.SerializeObject(args.Item)}");
-        }
+        Log.Logger.Information("Disconnected from Archipelago");
+        // Avoid ongoing timers affecting a new game.
+        StartMMLTimer?.Enabled = false;
+        GameLoopTimer?.Enabled = false;
+        HasSubmittedGoal = false;
         return;
     }
 
     private static async void StartMMLGame(object? sender, ElapsedEventArgs e)
     {
-        if (APClient == null || APClient.ItemManager == null || APClient.CurrentSession == null || !LocationManager_EnableLocationsCondition())
+        if (
+            APClient != null &&
+            APClient.ItemManager != null &&
+            APClient.CurrentSession != null && 
+            LocationManager_EnableLocationsCondition()
+        )
         {
-            return;
+            StartMMLTimer?.Enabled = false;
+            _ = APClient.ReceiveReady();
         }
-
-        // Start gameplay loop
-        _gameLoopTimer = new Timer();
-        _gameLoopTimer.Elapsed += new ElapsedEventHandler(ModifyGameLoop);
-        _gameLoopTimer.Interval = 500;
-        _gameLoopTimer.Enabled = true;
-        APClient.ReceiveReady();
-
-        if (_startMMLTimer != null)
-        {
-            _startMMLTimer.Enabled = false;
-        }
+        return;
     }
 
     private static async void ModifyGameLoop(object? sender, ElapsedEventArgs e)
     {
-        if (APClient == null || APClient.ItemManager == null || APClient.CurrentSession == null)
+        if (System.Threading.Interlocked.CompareExchange(ref IsGameLoopRunning, 1, 0) != 0)
         {
-            return;
+            return; // Previous call is still running, skip this tick.
         }
         try
         {
-            //Log.Logger.Information($"Locations enabled: {LocationManager_EnableLocationsCondition().ToString()}");
-            CheckGoalCondition();
+            if (
+                APClient != null &&
+                APClient.ItemManager != null &&
+                APClient.CurrentSession != null
+            )
+            {
+                try
+                {
+                    if (LocationManager_EnableLocationsCondition())
+                    {
+                        // Task 1: Check goal
+                        CheckGoalCondition();
+
+                        // Task 2: Do things when changing rooms
+                        ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+                        if (
+                            (currentLevelID != PreviousLevelID) &&
+                            MemoryHelpers.IsInGameOrCutscene() &&
+                            !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0)
+                        )
+                        {
+                            IsManagingLevelChange = true;
+                        }
+                        PreviousLevelID = currentLevelID;
+
+                        if (
+                            IsManagingLevelChange &&
+                            MemoryHelpers.IsInGameOrCutscene() &&
+                            !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0) &&
+                            !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0) &&
+                            !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber ?? 0) &&
+                            LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
+                        )
+                        {
+                            System.Threading.Thread.Sleep(50);
+                            switch (currentLevelData)
+                            {
+                                case { RoomName: "Ira's Room" }:
+                                    // Handle "Cure Ira's illness" location
+                                    if (
+                                        ScoutedLocationItemData != null &&
+                                        ScoutedLocationItemData.TryGetValue(111, out var iraScoutedItemData) &&
+                                        LocationDataDict.TryGetValue(111, out var iraLocationData) &&
+                                        iraLocationData.Name == "Cure Ira's illness" &&
+                                        iraLocationData.TextBoxStartAddress != null
+                                    )
+                                    {
+                                        OverwrittenTextData = TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData));
+                                    }
+                                    break;
+                                case { RoomName: "Junk Shop" }:
+                                    //Handle "Rescue the shop owner's husband" location
+                                    if (
+                                        ScoutedLocationItemData != null &&
+                                        ScoutedLocationItemData.TryGetValue(104, out var rescueScoutedItemData) &&
+                                        LocationDataDict.TryGetValue(104, out var rescueLocationData) &&
+                                        rescueLocationData.Name == "Rescue the shop owner's husband" &&
+                                        rescueLocationData.TextBoxStartAddress != null
+                                    )
+                                    {
+                                        //OverwrittenTextData = TextHelpers.OverwriteText(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData));
+                                        Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
+                                    }
+                                    break;
+                                case { RoomName: "City Hall Outdoors" }:
+                                    // Handle worker dialogue for Pick
+                                    List<byte[]> substrs =
+                                        [
+                                            TextHelpers.EncodeSimpleString("Huh? A pick?"),
+                                            TextHelpers.newPage,
+                                            TextHelpers.EncodeSimpleString("Never heard of it.\n:)"),
+                                            TextHelpers.newPage,
+                                            TextHelpers.EncodeSimpleString("Try looking elsewhere!"),
+                                            TextHelpers.endWindow
+                                        ];
+                                    byte[] workerTextChange = TextHelpers.ConcatArrayList(substrs);
+                                    Memory.WriteByteArray(Addresses.WorkerGetPickTextStart.Address, workerTextChange);
+                                    break;
+                                case { RoomName: "Downtown" }:
+                                    // Handle library pail in case player can't trigger worker dialogue because they already have the Saw
+                                    if (Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber ?? 0))
+                                    {
+                                        Memory.WriteBit(Addresses.SawPailIsReady.Address, Addresses.SawPailIsReady.BitNumber ?? 7, true);
+                                    }
+                                    // Handle center pail in case player can't enable dialogue chain because they already have the Bag
+                                    if (Memory.ReadBit(0xBE3BA, 6))
+                                    {
+                                        Memory.WriteBit(Addresses.BagPailIsReady.Address, Addresses.BagPailIsReady.BitNumber ?? 7, true);
+                                    }
+                                    break;
+                                case { RoomName: "Old City (dogs, no weapons)" }:
+                                    // Prevent warehouse soft-lock by moving (invisible) warehouse double doors z-axis
+                                    if (!Memory.ReadBit(Addresses.SubCitiesSurfaced.Address, Addresses.SubCitiesSurfaced.BitNumber ?? 1))
+                                    {
+                                        Memory.WriteByte(0x1169D4, 0xFF);
+                                        Memory.WriteByte(0x1169EB, 0xFF);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                            IsManagingLevelChange = false;
+                        }
+
+                        // Task 3: Write back any overwritten text
+                        if (
+                            !Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber ?? 7) &&
+                            OverwrittenTextData != null
+                        )
+                        {
+                            Memory.WriteByteArray(OverwrittenTextData.StartAddress, OverwrittenTextData.TextByteArr);
+                            OverwrittenTextData = null;
+                        }
+                    }
+
+                    // Task 4: Handle receiving items after loading a save (leaving title screen)
+                    // Logic:
+                    // - Receive all non-zenny items after moving from title screen to in-game
+                    // - Open all containers/holes that were previously opened
+                    // Potential issues:
+                    // - Currently only works on bit checks, which is fine for now since we only have bit checks
+                    // - Only re-check container locations, so players can still get vanilla items from side-quest checks. But didn't want to risk breaking quest progression by writing to quest check addresses.
+                    bool isCurrentlyInTitleScreen = MemoryHelpers.IsInTitleScreen();
+                    if (
+                        IsPreviouslyInTitleScreen &&
+                        !isCurrentlyInTitleScreen
+                    )
+                    {
+                        IsReceivingItemsAfterLoad = true;
+                    }
+                    IsPreviouslyInTitleScreen = isCurrentlyInTitleScreen;
+
+                    if (
+                        IsReceivingItemsAfterLoad &&
+                        LocationManager_EnableLocationsCondition()
+                    )
+                    {
+                        IReadOnlyCollection<long> allLocationsChecked = APClient.CurrentSession.Locations.AllLocationsChecked;
+                        if (allLocationsChecked.Count > 0)
+                        {
+                            Log.Logger.Information("Re-checking previously checked container locations...");
+                            foreach (long locationID in allLocationsChecked)
+                            {
+                                if (LocationDataDict.TryGetValue((int)locationID, out LocationData? locationData))
+                                {
+                                    if (new[] { LocationCategory.Container, LocationCategory.Hole, LocationCategory.Pickup }.Contains(locationData.Category))
+                                    {
+                                        if (locationData.CheckAddressData.BitNumber != null)
+                                        {
+                                            Memory.WriteBit(locationData.CheckAddressData.Address, locationData.CheckAddressData.BitNumber ?? 0, true);
+                                        }
+                                        else
+                                        {
+                                            Log.Logger.Warning($"No check bit defined for location ID {locationID}. Please report this in the Discord thread!");
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Log.Logger.Warning($"Failed to receive item for location ID {locationID} after loading save. Please report this in the Discord thread!");
+                                }
+                            }
+                        }
+                        IReadOnlyCollection<ItemInfo> allItemsReceived = APClient.CurrentSession.Items.AllItemsReceived;
+                        if (allItemsReceived.Count > 0)
+                        {
+                            Log.Logger.Information("Receiving non-zenny items from previously received items...");
+                            foreach (ItemInfo itemInfo in allItemsReceived)
+                            {
+                                if (ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData))
+                                {
+                                    if (itemData.Category != ItemCategory.Zenny)
+                                    {
+                                        ItemHelpers.ReceiveGenericItem(itemData);
+                                    }
+                                }
+                                else
+                                {
+                                    Log.Logger.Warning($"Failed to receive item ID {itemInfo.ItemId} after loading save. Please report this in the Discord thread!");
+                                }
+                            }
+                        }
+                        IsReceivingItemsAfterLoad = false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Logger.Warning("Encountered an error while managing the game loop.");
+                    Log.Logger.Warning(ex.ToString());
+                    Log.Logger.Warning("This is not necessarily a problem if it happens during release or collect.");
+                }
+            }
         }
-        catch (Exception ex)
+        finally
         {
-            Log.Logger.Warning("Encountered an error while managing the game loop.");
-            Log.Logger.Warning(ex.ToString());
-            Log.Logger.Warning("This is not necessarily a problem if it happens during release or collect.");
+            System.Threading.Interlocked.Exchange(ref IsGameLoopRunning, 0);
         }
         return;
     }
@@ -363,8 +550,10 @@ public partial class App : Application
     private static void CheckGoalCondition()
     {
         if (
-            !_hasSubmittedGoal ||
-            LocationManager_EnableLocationsCondition()
+            APClient != null && (
+                !HasSubmittedGoal ||
+                LocationManager_EnableLocationsCondition()
+            )
         )
         {
             APClient.Options.TryGetValue("goal", out var goalValueObj);
@@ -379,9 +568,62 @@ public partial class App : Application
                 if (isGoalComplete)
                 {
                     APClient.SendGoalCompletion();
-                    _hasSubmittedGoal = true;
+                    HasSubmittedGoal = true;
                 }
             }
+        }
+        return;
+    }
+
+    private static bool LocationManager_EnableLocationsCondition()
+    {
+        bool[] conditions = [
+            MemoryHelpers.IsInGameOrCutscene(),
+            !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber??0),
+            !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber??0),
+            //!Memory.ReadBit(Addresses.DungeonMapFlag.Address, Addresses.DungeonMapFlag.BitNumber??0),
+            //!Memory.ReadBit(Addresses.PauseMenuFlag.Address, Addresses.PauseMenuFlag.BitNumber??0),
+            !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber??0),
+            !Memory.ReadBit(Addresses.CameraAlteredFlag.Address, Addresses.CameraAlteredFlag.BitNumber??0) || (
+                new short [] {
+                    0x0803,  // Allow locations to be checked during the Beast Hunter minigame since the camera is altered but the player is still in game.
+                    0x0F01   // Turn in missing bag has altered camera
+                }.Contains(Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big))
+            )
+        ];
+        return conditions.All(value => value);
+    }
+
+    private void LocationManager_LocationCompleted(object? sender, LocationCompletedEventArgs e)
+    {
+        if (
+            APClient != null &&
+            APClient.LocationManager != null && 
+            APClient.CurrentSession != null &&
+            ScoutedLocationItemData != null
+        )
+        {
+            // Use scouted location item to rewrite textbox
+            LocationData locationData = LocationDataDict[e.CompletedLocation.Id];
+            if (locationData.TextBoxStartAddress != null)
+            {
+                ItemData itemData = ScoutedLocationItemData[e.CompletedLocation.Id];
+                OverwrittenTextData = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));
+            }
+        }
+        return;
+    }
+
+    private static void ItemManager_ItemReceived(object? sender, ItemReceivedEventArgs args)
+    {
+        if (
+            APClient != null &&
+            APClient.CurrentSession != null && 
+            ItemDataDict.TryGetValue(args.Item.Id, out ItemData? itemData)
+        )
+        {
+            ItemHelpers.ReceiveGenericItem(itemData);
+            Log.Logger.Debug($"Item Received: {JsonConvert.SerializeObject(args.Item)}");
         }
         return;
     }
@@ -394,40 +636,18 @@ public partial class App : Application
 
     private static async void CurrentSession_CheckedLocationsUpdated(System.Collections.ObjectModel.ReadOnlyCollection<long> newCheckedLocations)
     {
-        if (APClient.ItemManager == null || APClient.CurrentSession == null) return;
-        if (!LocationManager_EnableLocationsCondition())
+        if (
+            APClient != null &&
+            APClient.ItemManager != null &&
+            APClient.CurrentSession != null
+        )
         {
-            Log.Logger.Error("Check sent while not in game. Please report this in the Discord thread!");
-        }
-        return;
-    }
+            if (!LocationManager_EnableLocationsCondition())
+            {
+                Log.Logger.Error("Check sent while not in game. Please report this in the Discord thread!");
+            }
 
-    private static async void Client_Connected(object? sender, EventArgs args)
-    {
-        // Ensure player is in game before starting gameplay loop
-        _startMMLTimer = new Timer();
-        _startMMLTimer.Elapsed += new ElapsedEventHandler(StartMMLGame);
-        _startMMLTimer.Interval = 5000;
-        _startMMLTimer.Enabled = true;
-
-        Log.Logger.Information("Connected to Archipelago");
-        Log.Logger.Information($"Playing {APClient.CurrentSession.ConnectionInfo.Game} as {APClient.CurrentSession.Players.GetPlayerName(APClient.CurrentSession.ConnectionInfo.Slot)}");
-        return;
-    }
-
-    private static async void Client_Disconnected(object? sender, EventArgs args)
-    {
-        Log.Logger.Information("Disconnected from Archipelago");
-        // Avoid ongoing timers affecting a new game.
-        if (_startMMLTimer != null)
-        {
-            _startMMLTimer.Enabled = false;
         }
-        if (_gameLoopTimer != null)
-        {
-            _gameLoopTimer.Enabled = false;
-        }
-        _hasSubmittedGoal = false;
         return;
     }
 }

@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Archipelago.Core.Util;
 using MMLAP.Models;
 using static MMLAP.Models.MMLEnums;
+using System;
+using System.Collections.Generic;
 
 namespace MMLAP.Helpers
 {
@@ -31,6 +32,7 @@ namespace MMLAP.Helpers
         public static readonly byte textColorCool1 = 0x58;
         public static readonly byte textColorCool2 = 0xB0;
         public static readonly byte[] youGot = [0x2E, 0x3F, 0x45, 0x4F, 0x36, 0x3F, 0x44, 0x13, 0x86];
+        public static readonly byte[] youGotSound = [0x8E, 0x86, 0x00];
         public static readonly byte[] redAPItem = [0x89, 0x02, 0x15, 0x24, 0x4F, 0x1D, 0x44, 0x34, 0x3C, 0x89, 0x00];
         public static readonly byte[] nothing = [0X22, 0X3F, 0X44, 0X37, 0X38, 0X3D, 0X36];
         public static readonly byte[] newPage = [0x9F, 0x87, 0x04, 0x00];
@@ -175,8 +177,9 @@ namespace MMLAP.Helpers
             return coloredEncoding;
         }
 
-        public static byte[] EncodeYouGotItemWindow(ItemData itemData)
+        public static byte[] EncodeYouGotItemWindow(ItemData itemData, byte[]? suffix = null)
         {
+            suffix ??= endWindow;
             List<ItemCategory> displayedItemCategories =
             [
                 ItemCategory.Buster,
@@ -201,12 +204,20 @@ namespace MMLAP.Helpers
             }
             List<byte[]> substrs =
             [
+                youGotSound,
                 youGot,
                 itemByteArray,
                 [charDict['!']],
-                endWindow
+                suffix
             ];
             return ConcatArrayList(substrs);
+        }
+
+        public static TextData OverwriteText(ulong startAddress, byte[] text)
+        {
+            TextData overwrittenTextData = new(startAddress, Memory.ReadByteArray(startAddress, text.Length));
+            Memory.WriteByteArray(startAddress, text);
+            return overwrittenTextData;
         }
     }
 }

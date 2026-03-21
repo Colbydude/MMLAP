@@ -45,17 +45,30 @@ namespace MMLAP.Helpers
         public static void ReceiveBusterPart(ItemData itemData)
         {
             ulong busterInv = Addresses.UnequippedBusterInvStart.Address;
-            int busterInvLength = Addresses.UnequippedBusterInvStart.ByteLength ?? 34;
+            int busterInvLength = Addresses.UnequippedBusterInvStart.ByteLength??34;
+            ulong? busterInvSlotWrite = null;
             for (uint i = 0; i < busterInvLength; i++)
             {
                 ulong busterInvSlot = busterInv + i;
                 byte invSlotVal = Memory.ReadByte(busterInvSlot);
-                if (invSlotVal == 0)
+                if (
+                    invSlotVal == 0 &&
+                    busterInvSlotWrite == null
+                )
                 {
-                    // Offset of 1 is intended for buster part code conversion
-                    Memory.Write(busterInvSlot, (itemData.ItemCode ?? -1) + 1);
+                    // Assign the first empty slot for writing but keep looking in case the item is already in the inventory
+                    busterInvSlotWrite = busterInvSlot;
+                }
+                if(invSlotVal == (itemData.ItemCode??-1)+1)
+                {
+                    // If the item is already in the inventory then do nothing
                     return;
                 }
+            }
+            if (busterInvSlotWrite != null)
+            {
+                // Offset of 1 is intended for buster part code conversion
+                Memory.Write(busterInvSlotWrite??0, (itemData.ItemCode??-1) + 1);
             }
             // If buster inventory is full then do nothing
             return;

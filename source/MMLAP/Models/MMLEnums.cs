@@ -17,7 +17,8 @@
             Container = 0,
             Hole = 1,
             Combat = 2,
-            Quest = 3
+            Quest = 3,
+            Pickup = 4
         }
 
         public enum CompletionGoal

@@ -84,18 +84,19 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         has_powered_buster = has_item("Cannon Kit")
         has_grand_grenade = has_item("Bomb Schematic")
         has_active_buster = has_item("Guidance Unit")
-        has_spread_buster = has_all_items(["Ancient Book", "Old Launcher"])
+        has_spread_buster = has_all_items(["Ancient Book", "Old Launcher", "Arm Supporter"])
         return has_any([has_powered_buster, has_grand_grenade, has_active_buster, has_spread_buster])
 
     def has_completed_clubhouse() -> Callable[[CollectionState], bool]:
         # The reward for this quest is not randomized, but the items for it are.
         items = [
+            "Pick",
             "Saw",
             "Stag Beetle",
             "Beetle",
             "Comic Book"
         ]
-        return has_all_items(items)
+        return has_all([has_completed_cardon_forest(), has_all_items(items)])
 
     def has_completed_museum() -> Callable[[CollectionState], bool]:
         items = [
@@ -110,8 +111,16 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             "Shiny Red Stone"
         ]
         # Use has_completed_clubhouse() instead of checking for Old Heater, since it isn't randomized.
-        return has_all_items(items) and has_completed_clubhouse()
+        return has_all([has_all_items(items), has_completed_clubhouse()])
     
+    def has_cardon_forest_keys() -> Callable[[CollectionState], bool]:
+        items = [
+            "Cardon Forest Sub-Gate Key 1",
+            "Cardon Forest Sub-Gate Key 2",
+            "Cardon Forest Sub-Gate Key 3"
+        ]
+        return has_all_items(items)
+
     def has_lake_jyun_keys() -> Callable[[CollectionState], bool]:
         items = [
             "Lake Jyun Sub-Gate Key 1",
@@ -136,15 +145,18 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         ]
         return has_all_items(items)
 
+    def has_completed_cardon_forest() -> Callable[[CollectionState], bool]:
+        return has_all([has_cardon_forest_keys()])
+    
     def has_completed_lake_jyun() -> Callable[[CollectionState], bool]:
-        return has_all([has_jump_springs(), has_lake_jyun_keys()])
+        return has_all([has_cardon_forest_keys(), has_jump_springs(), has_lake_jyun_keys()])
     
     def has_completed_clozer_woods() -> Callable[[CollectionState], bool]:
-        return has_all([has_completed_lake_jyun(), has_clozer_woods_keys(), has_explosive_wep()])
+        return has_all([has_cardon_forest_keys(), has_completed_lake_jyun(), has_clozer_woods_keys(), has_explosive_wep()])
 
     # Current Assumptions:
     # - Yellow Refractor = No requirement b/c cardon keys aren't randomized
-    # - Balkon Gerät defeated = No req b/c +2 range upgrade in shop isn't randomized
+    # - Balkon Gerat defeated = No req b/c +2 range upgrade in shop isn't randomized
     # - Red Refractor = Lake Jyun Requirements = Jump springs & Lake Jyun keys
     # - Sub City = Lake Jyun and Clozer Requirements = Jump springs & Lake Jyun keys & Clozer keys (& Explosive ?? Not sure)
     # - Clozer sub-gate is not accessible from ruins besides (Gorubesshu Corridor), the other doors dont work
@@ -157,7 +169,6 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     #
     # Known soft-locks:
     # - Can get stuck in Old City warehouse before the Bruno fight is enabled.
-    # - Can get stuck on lower level in Lake Jyun pyramid room without jump springs.
     regionDataDict = {
         "Ocean Tower - Room 1": 
             GameRegionData(
@@ -214,8 +225,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Flutter - Barrell's Room"),
                     ExitData("Flutter - Mega Man's Room"),
                     ExitData("Flutter - Roll's Room"),
-                    ExitData("Clozer Woods Sub-Gate - Entrance"),
-                    ExitData("Support Car / R&D Room")
+                    ExitData("Clozer Woods Sub-Gate - Entrance")
                 ]
             ),
         "Flutter - Barrell's Room": 
@@ -242,7 +252,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
-                    ExitData("Flutter - Common Room")
+                    ExitData("Flutter - Common Room"),
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Support Car / R&D Room": 
@@ -324,7 +335,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Apple Market - Junk Shop (Turn-in Rescue)": 
             GameRegionData(
                 [
-                   #"Rescue the shop owner's husband"
+                   "Rescue the shop owner's husband"
                 ],
                 [
                     ExitData("Apple Market - Junk Shop")
@@ -386,7 +397,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Downtown - Outside (Boss fight)"),
                     ExitData("Downtown - Outside (Blumebear pail)"), # Only lootable after city hall is saved
                     ExitData("Downtown - Outside (Lost Bag)", has_completed_lake_jyun()), 
-                    ExitData("Downtown - Outside (Discarded Saw)"),# , has_item("Pick")),
+                    ExitData("Downtown - Outside (Discarded Saw)", has_all([has_completed_cardon_forest(), has_item("Pick")])),
                     ExitData("Downtown - Library"),
                     ExitData("City Hall - Outside"),
                     ExitData("Uptown"),
@@ -497,10 +508,20 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "City Hall - Inspector's Office": 
             GameRegionData(
                 [
-
+                    
                 ],
                 [
-                    ExitData("City Hall - Police Station")
+                    ExitData("City Hall - Police Station"),
+                    ExitData("City Hall - Inspector's Office (Turn in Bag)", has_item("Bag"))
+                ]
+            ),
+        "City Hall - Inspector's Office (Turn in Bag)": 
+            GameRegionData(
+                [
+                    "Turn in missing bag"
+                ],
+                [
+                    ExitData("City Hall - Inspector's Office")
                 ]
             ),
         "City Hall - Bank": 
@@ -516,7 +537,6 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     "Uptown, Hospital right pail",
-                   #"Uptown, Hospital left pail",
                     "Uptown, Ocean corner pail"
                 ],
                 [
@@ -526,7 +546,17 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Wily's Boat - Walkway"),
                     ExitData("Uptown - TV Station"),
                     ExitData("Uptown Sub-City - City", has_completed_clozer_woods()),
-                    ExitData("Support Car / R&D Room")
+                    ExitData("Support Car / R&D Room"),
+                    ExitData("Uptown - (Hospital left pail)", has_completed_cardon_forest())
+                ]
+            ),
+        "Uptown - (Hospital left pail)":
+            GameRegionData(
+                [
+                   "Uptown, Hospital left pail"
+                ],
+                [
+                    ExitData("Uptown")
                 ]
             ),
         "Uptown - Hospital": 
@@ -638,8 +668,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("Wily's Boat - Inside"),
-                    ExitData("Lake Jyun - Boss Fight"),#, has_completed_cardon_forest()),
-                    ExitData("Lake Jyun - Outside Sub-Gate"),#, has_completed_cardon_forest())
+                    ExitData("Lake Jyun - Boss Fight", has_completed_cardon_forest()),
+                    ExitData("Lake Jyun - Outside Sub-Gate", has_completed_cardon_forest())
                 ]
             ),
         "Museum - Floor 1": 
@@ -818,7 +848,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     ExitData("City Hall - Outside"),
                     ExitData("Clozer Woods - Bridge Area"),
-                    ExitData("Yass Plains - Hideout Stage 1"),
+                    ExitData("Yass Plains - Hideout Stage 1", has_completed_cardon_forest()),
                     ExitData("Yass Plains - Empty House"),
                     ExitData("Yass Plains - Junk Shop House")
                 ]
@@ -949,7 +979,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     # Requires +2 Range upgrade
-                    "Balkon Gerät defeated"
+                    "Balkon Gerat defeated"
                 ],
                 [
                     ExitData("Lake Jyun - Outside Sub-Gate")#, has_item("Range Booster Alpha"))
@@ -1061,10 +1091,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
-                    ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Upper North)"), # Has defeated BG?
+                    ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Upper North)", has_completed_cardon_forest()),
                     ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Lake Jyun Sub-Gate West Exit)"),
                     ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Lake Jyun Sub-Gate East Exit)"),
-                    ExitData("Lake Jyun Sub-Gate - Boss Room (Inactive)") # Has defeated BG?
+                    ExitData("Lake Jyun Sub-Gate - Boss Room (Inactive)", has_completed_cardon_forest())
                 ]
             ),
         "Lake Jyun Sub-Gate - Boss Room (Inactive)": 

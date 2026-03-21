@@ -12,6 +12,7 @@ class LocationCategory(IntEnum):
     CONTAINER = 0
     QUEST = 1
     COMBAT = 2
+    PICKUP = 3
 
 class GameLocation(Location):
     game = "Mega Man Legends"
@@ -21,7 +22,7 @@ class LocationData(NamedTuple):
     category: LocationCategory
     isMissable: bool
 
-locationDataDict = {
+LOCATION_DATA_DICT = {
     "Ocean tower, Right chest"                                      : LocationData(1,   LocationCategory.CONTAINER,  True),
     "Ocean tower, Left chest"                                       : LocationData(2,   LocationCategory.CONTAINER,  True),
     "Apple market, Electric goods box"                              : LocationData(3,   LocationCategory.CONTAINER, False),
@@ -35,7 +36,7 @@ locationDataDict = {
     "Downtown, Center pail"                                         : LocationData(11,  LocationCategory.CONTAINER, False),
     "Downtown, Library pail"                                        : LocationData(12,  LocationCategory.CONTAINER, False),
     "Uptown, Hospital right pail"                                   : LocationData(13,  LocationCategory.CONTAINER, False),
-   #"Uptown, Hospital left pail"                                    : LocationData(14,  LocationCategory.CONTAINER, False),
+    "Uptown, Hospital left pail"                                    : LocationData(14,  LocationCategory.CONTAINER, False),
     "Uptown, Ocean corner pail"                                     : LocationData(15,  LocationCategory.CONTAINER, False),
     "Wily's Boat, Right box"                                        : LocationData(16,  LocationCategory.CONTAINER, False),
    #"Wily's Boat, Left box"                                         : LocationData(17,  LocationCategory.CONTAINER, False),
@@ -81,9 +82,9 @@ locationDataDict = {
     "Cardon Forest Sub-Gate, Bottom conveyor hole"                  : LocationData(57,  LocationCategory.CONTAINER, False),
     "Cardon Forest Sub-Gate, Middle conveyor hole"                  : LocationData(58,  LocationCategory.CONTAINER, False),
     "Cardon Forest Sub-Gate, Middle switch chest"                   : LocationData(59,  LocationCategory.CONTAINER, False),
-   #"Cardon Forest Sub-Gate, Sharukurusu starter key 1"             : LocationData(60,  LocationCategory.CONTAINER, False),
-   #"Cardon Forest Sub-Gate, Conveyor key 2"                        : LocationData(61,  LocationCategory.CONTAINER, False),
-   #"Cardon Forest Sub-Gate, Conveyor key get 3"                    : LocationData(62,  LocationCategory.CONTAINER, False),
+    "Cardon Forest Sub-Gate, Jakko nest starter key get"            : LocationData(60,  LocationCategory.PICKUP,    False),
+    "Cardon Forest Sub-Gate, Conveyor chest starter key get"        : LocationData(61,  LocationCategory.PICKUP,    False),
+    "Cardon Forest Sub-Gate, Three switch starter key get"          : LocationData(62,  LocationCategory.PICKUP,    False),
     "Lake Jyun Sub-Gate, Entrance right hole"                       : LocationData(63,  LocationCategory.CONTAINER, False),
     "Lake Jyun Sub-Gate, Entrance left hole"                        : LocationData(64,  LocationCategory.CONTAINER, False),
     "Lake Jyun Sub-Gate, Entrance chest"                            : LocationData(65,  LocationCategory.CONTAINER, False),
@@ -120,17 +121,17 @@ locationDataDict = {
     "Ferdinand defeated"                                            : LocationData(96,  LocationCategory.COMBAT,    False),
     "Bon Bonne defeated"                                            : LocationData(97,  LocationCategory.COMBAT,    False),
     "Marlwolf defeated"                                             : LocationData(98,  LocationCategory.COMBAT,    False),
-    "Balkon Gerät defeated"                                         : LocationData(99,  LocationCategory.COMBAT,    False),
+    "Balkon Gerat defeated"                                         : LocationData(99,  LocationCategory.COMBAT,    False),
     "Garudoriten defeated"                                          : LocationData(100, LocationCategory.COMBAT,    False),
     "Karumuna Bash Trio defeated"                                   : LocationData(101, LocationCategory.COMBAT,    False),
     "Focke-Wulf defeated"                                           : LocationData(102, LocationCategory.COMBAT,    False),
     "Theodore Bruno defeated"                                       : LocationData(103, LocationCategory.COMBAT,    False),
-   #"Rescue the shop owner's husband"                               : LocationData(104, LocationCategory.QUEST,     False),
-    "Race Technical Course Rank A"                                  : LocationData(105, LocationCategory.QUEST,     False),
-    "Beast Hunter Rank A"                                           : LocationData(106, LocationCategory.QUEST,     False),
+    "Rescue the shop owner's husband"                               : LocationData(104, LocationCategory.QUEST,     False),
+    "Beast Hunter Rank A"                                           : LocationData(105, LocationCategory.QUEST,     False),
+    "Balloon Fantasy Rank A"                                        : LocationData(106, LocationCategory.QUEST,     False),
     "Race Straight Course Rank A"                                   : LocationData(107, LocationCategory.QUEST,     False),
-    "Balloon Fantasy Rank A"                                        : LocationData(108, LocationCategory.QUEST,     False),
-    "Race Left Curve Course Rank A"                                 : LocationData(109, LocationCategory.QUEST,     False),
+    "Race Left Curve Course Rank A"                                 : LocationData(108, LocationCategory.QUEST,     False),
+    "Race Technical Course Rank A"                                  : LocationData(109, LocationCategory.QUEST,     False),
     "Save the missing woman"                                        : LocationData(110, LocationCategory.QUEST,     False),
     "Cure Ira's illness"                                            : LocationData(111, LocationCategory.QUEST,     False),
    #"Tell painter she needs red"                                    : LocationData(112, LocationCategory.QUEST,     False),
@@ -148,12 +149,13 @@ locationDataDict = {
     "Gift Flower to Roll"                                           : LocationData(124, LocationCategory.QUEST,     False),
     "Gift Music Box to Roll"                                        : LocationData(125, LocationCategory.QUEST,     False),
     "Gift Ring to Roll"                                             : LocationData(126, LocationCategory.QUEST,     False),
+    "Turn in missing bag"                                           : LocationData(127, LocationCategory.QUEST,     False),
     "Juno Defeated"                                                 : LocationData(999, LocationCategory.COMBAT,    False),
 }
 
-LOCATION_NAME_TO_ID         = {locationName: locationDataDict[locationName].id         for locationName in locationDataDict.keys()}
-LOCATION_NAME_TO_CATEGORY   = {locationName: locationDataDict[locationName].category   for locationName in locationDataDict.keys()}
-LOCATION_NAME_TO_ISMISSABLE = {locationName: locationDataDict[locationName].isMissable for locationName in locationDataDict.keys()}
+LOCATION_NAME_TO_ID         = {locationName: LOCATION_DATA_DICT[locationName].id         for locationName in LOCATION_DATA_DICT.keys()}
+LOCATION_NAME_TO_CATEGORY   = {locationName: LOCATION_DATA_DICT[locationName].category   for locationName in LOCATION_DATA_DICT.keys()}
+LOCATION_NAME_TO_ISMISSABLE = {locationName: LOCATION_DATA_DICT[locationName].isMissable for locationName in LOCATION_DATA_DICT.keys()}
 
 def get_location_names_with_ids(location_names: list[str]) -> dict[str, int | None]:
     return {location_name: LOCATION_NAME_TO_ID[location_name] for location_name in location_names}
@@ -174,8 +176,7 @@ def create_regular_locations(world: GameWorld) -> None:
 
 def create_events(world: GameWorld) -> None:
     juno_region = world.get_region("Main Gate - Juno Area (Boss)")
-    juno_region.add_event("Juno Defeated", "Victory", location_type=GameLocation,
-                       item_type=items.GameItem, rule=lambda state: True)  # Add logic for beating Juno with access.
+    juno_region.add_event("Juno Defeated", "Victory", location_type=GameLocation, item_type=items.GameItem, rule=lambda state: True)  # Add logic for beating Juno with access.
     world.multiworld.completion_condition[world.player] = lambda state: state.has("Victory", world.player)
 
 def lock_missables_to_filler(world) -> None:
@@ -185,7 +186,7 @@ def lock_missables_to_filler(world) -> None:
         if cls == ItemClassification.filler
     ]
     world.locked_missable_filler_names = []
-    missable_locations = [loc for loc in world.multiworld.get_locations(world.player) if locationDataDict[loc.name].isMissable]
+    missable_locations = [loc for loc in world.multiworld.get_locations(world.player) if LOCATION_DATA_DICT[loc.name].isMissable]
     for loc in missable_locations:
         name = world.random.choice(filler_item_names) 
         loc.place_locked_item(world.create_item(name))
