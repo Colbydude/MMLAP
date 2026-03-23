@@ -19,6 +19,7 @@ using Newtonsoft.Json;
 using ReactiveUI;
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,7 +51,7 @@ public partial class App : Application
     private static Timer? GameLoopTimer { get; set; }
     private static int IsGameLoopRunning = 0;
     private static Timer? StartMMLTimer { get; set; }
-    private static TextData? OverwrittenTextData { get; set; }
+    private static ConcurrentQueue<TextData> TextDataToWriteQueue { get; set; } = new();
     private static ushort? PreviousLevelID { get; set; }
     private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
@@ -538,35 +539,38 @@ public partial class App : Application
                 APClient.CurrentSession != null
             )
             {
-                try
+                // Pause loop if title menu or save menu
+                if (
+                    MemoryHelpers.IsOutOfTitleScreen() &&
+                    !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0)
+                )
                 {
-                    if (LocationManager_EnableLocationsCondition())
+                    // Task 1: Check goal
+                    CheckGoalCondition();
+
+                    // Task 2: Do things when changing rooms
+                    // Task 2a: Check if level has changed, and if so, set flag to manage level change
+                    ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+                    if (currentLevelID != PreviousLevelID)
                     {
-                        // Task 1: Check goal
-                        CheckGoalCondition();
+                        IsManagingLevelChange = true;
+                    }
+                    PreviousLevelID = currentLevelID;
 
-                        // Task 2: Do things when changing rooms
-                        ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
-                        if (
-                            (currentLevelID != PreviousLevelID) &&
-                            MemoryHelpers.IsInGameOrCutscene() &&
-                            !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0)
-                        )
-                        {
-                            IsManagingLevelChange = true;
-                        }
-                        PreviousLevelID = currentLevelID;
+                    // Wait until loading and screen wipe flags are false (to avoid racing with the game loading assets), then do stuff
+                    if (
+                        !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0) &&
+                        !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber ?? 0)
+                    )
+                    {
+                        System.Threading.Thread.Sleep(50);
 
+                        // Task 2b: Based on current level, do things like overwrite text for locations that were scouted and manipulate worker dialogue and warehouse doors to prevent soft-locks.
                         if (
                             IsManagingLevelChange &&
-                            MemoryHelpers.IsInGameOrCutscene() &&
-                            !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0) &&
-                            !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0) &&
-                            !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber ?? 0) &&
                             LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
                         )
                         {
-                            System.Threading.Thread.Sleep(50);
                             switch (currentLevelData)
                             {
                                 case { RoomName: "Ira's Room" }:
@@ -579,7 +583,7 @@ public partial class App : Application
                                         iraLocationData.TextBoxStartAddress != null
                                     )
                                     {
-                                        OverwrittenTextData = TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData));
+                                        TextDataToWriteQueue.Enqueue(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData)));
                                     }
                                     break;
                                 case { RoomName: "Junk Shop" }:
@@ -613,8 +617,8 @@ public partial class App : Application
                                 case { RoomName: "Downtown" }:
                                     // Handle library pail in case player can't trigger worker dialogue because they already have the Saw
                                     if (
-                                        Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber??0) ||
-                                        Memory.ReadBit(Addresses.TurnedInSaw.Address, Addresses.TurnedInSaw.BitNumber??5)
+                                        Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber ?? 0) ||
+                                        Memory.ReadBit(Addresses.TurnedInSaw.Address, Addresses.TurnedInSaw.BitNumber ?? 5)
                                     )
                                     {
                                         Memory.WriteBit(Addresses.SawPailIsReady.Address, Addresses.SawPailIsReady.BitNumber ?? 7, true);
@@ -639,94 +643,94 @@ public partial class App : Application
                             IsManagingLevelChange = false;
                         }
 
-                        // Task 3: Write back any overwritten text
+                        // Task 3: If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
                         if (
                             !Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber ?? 7) &&
-                            OverwrittenTextData != null
+                            TextDataToWriteQueue.TryDequeue(out var OverwrittenTextData)
                         )
                         {
                             Memory.WriteByteArray(OverwrittenTextData.StartAddress, OverwrittenTextData.TextByteArr);
-                            OverwrittenTextData = null;
                         }
                     }
 
-                    // Task 4: Handle receiving items after loading a save (leaving title screen)
-                    // Logic:
-                    // - Receive all non-zenny items after moving from title screen to in-game
-                    // - Open all containers/holes that were previously opened
-                    // Potential issues:
-                    // - Currently only works on bit checks, which is fine for now since we only have bit checks
-                    // - Only re-check container locations, so players can still get vanilla items from side-quest checks. But didn't want to risk breaking quest progression by writing to quest check addresses.
-                    bool isCurrentlyInTitleScreen = MemoryHelpers.IsInTitleScreen();
-                    if (
-                        IsPreviouslyInTitleScreen &&
-                        !isCurrentlyInTitleScreen
-                    )
-                    {
-                        IsReceivingItemsAfterLoad = true;
-                    }
-                    IsPreviouslyInTitleScreen = isCurrentlyInTitleScreen;
-
-                    if (
-                        IsReceivingItemsAfterLoad &&
-                        LocationManager_EnableLocationsCondition()
-                    )
-                    {
-                        IReadOnlyCollection<long> allLocationsChecked = APClient.CurrentSession.Locations.AllLocationsChecked;
-                        if (allLocationsChecked.Count > 0)
-                        {
-                            Log.Logger.Information("Re-checking previously checked container locations...");
-                            foreach (long locationID in allLocationsChecked)
-                            {
-                                if (LocationDataDict.TryGetValue((int)locationID, out LocationData? locationData))
-                                {
-                                    if (new[] { LocationCategory.Container, LocationCategory.Hole, LocationCategory.Pickup }.Contains(locationData.Category))
-                                    {
-                                        if (locationData.CheckAddressData.BitNumber != null)
-                                        {
-                                            Memory.WriteBit(locationData.CheckAddressData.Address, locationData.CheckAddressData.BitNumber ?? 0, true);
-                                        }
-                                        else
-                                        {
-                                            Log.Logger.Warning($"No check bit defined for location ID {locationID}. Please report this in the Discord thread!");
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    Log.Logger.Warning($"Failed to receive item for location ID {locationID} after loading save. Please report this in the Discord thread!");
-                                }
-                            }
-                        }
-                        IReadOnlyCollection<ItemInfo> allItemsReceived = APClient.CurrentSession.Items.AllItemsReceived;
-                        if (allItemsReceived.Count > 0)
-                        {
-                            Log.Logger.Information("Receiving non-zenny items from previously received items...");
-                            foreach (ItemInfo itemInfo in allItemsReceived)
-                            {
-                                if (ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData))
-                                {
-                                    if (itemData.Category != ItemCategory.Zenny)
-                                    {
-                                        ItemHelpers.ReceiveGenericItem(itemData);
-                                    }
-                                }
-                                else
-                                {
-                                    Log.Logger.Warning($"Failed to receive item ID {itemInfo.ItemId} after loading save. Please report this in the Discord thread!");
-                                }
-                            }
-                        }
-                        IsReceivingItemsAfterLoad = false;
-                    }
                 }
-                catch (Exception ex)
+
+                // Task 4: Handle receiving items after loading a save (leaving title screen)
+                // Logic:
+                // - Receive all non-zenny items after moving from title screen to in-game
+                // - Open all containers/holes that were previously opened
+                // Potential issues:
+                // - Currently only works on bit checks, which is fine for now since we only have bit checks
+                // - Only re-check container locations, so players can still get vanilla items from side-quest checks. But didn't want to risk breaking quest progression by writing to quest check addresses.
+                bool isCurrentlyInTitleScreen = MemoryHelpers.IsInTitleScreen();
+                if (
+                    IsPreviouslyInTitleScreen &&
+                    !isCurrentlyInTitleScreen
+                )
                 {
-                    Log.Logger.Warning("Encountered an error while managing the game loop.");
-                    Log.Logger.Warning(ex.ToString());
-                    Log.Logger.Warning("This is not necessarily a problem if it happens during release or collect.");
+                    IsReceivingItemsAfterLoad = true;
+                }
+                IsPreviouslyInTitleScreen = isCurrentlyInTitleScreen;
+
+                if (
+                    IsReceivingItemsAfterLoad &&
+                    LocationManager_EnableLocationsCondition()
+                )
+                {
+                    IReadOnlyCollection<long> allLocationsChecked = APClient.CurrentSession.Locations.AllLocationsChecked;
+                    if (allLocationsChecked.Count > 0)
+                    {
+                        Log.Logger.Information("Re-checking previously checked container locations...");
+                        foreach (long locationID in allLocationsChecked)
+                        {
+                            if (LocationDataDict.TryGetValue((int)locationID, out LocationData? locationData))
+                            {
+                                if (new[] { LocationCategory.Container, LocationCategory.Hole, LocationCategory.Pickup }.Contains(locationData.Category))
+                                {
+                                    if (locationData.CheckAddressData.BitNumber != null)
+                                    {
+                                        Memory.WriteBit(locationData.CheckAddressData.Address, locationData.CheckAddressData.BitNumber ?? 0, true);
+                                    }
+                                    else
+                                    {
+                                        Log.Logger.Warning($"No check bit defined for location ID {locationID}. Please report this in the Discord thread!");
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Log.Logger.Warning($"Failed to receive item for location ID {locationID} after loading save. Please report this in the Discord thread!");
+                            }
+                        }
+                    }
+                    IReadOnlyCollection<ItemInfo> allItemsReceived = APClient.CurrentSession.Items.AllItemsReceived;
+                    if (allItemsReceived.Count > 0)
+                    {
+                        Log.Logger.Information("Receiving non-zenny items from previously received items...");
+                        foreach (ItemInfo itemInfo in allItemsReceived)
+                        {
+                            if (ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData))
+                            {
+                                if (itemData.Category != ItemCategory.Zenny)
+                                {
+                                    ItemHelpers.ReceiveGenericItem(itemData);
+                                }
+                            }
+                            else
+                            {
+                                Log.Logger.Warning($"Failed to receive item ID {itemInfo.ItemId} after loading save. Please report this in the Discord thread!");
+                            }
+                        }
+                    }
+                    IsReceivingItemsAfterLoad = false;
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Log.Logger.Warning("Encountered an error while managing the game loop.");
+            Log.Logger.Warning(ex.ToString());
+            Log.Logger.Warning("This is not necessarily a problem if it happens during release or collect.");
         }
         finally
         {
@@ -766,18 +770,10 @@ public partial class App : Application
     private static bool LocationManager_EnableLocationsCondition()
     {
         bool[] conditions = [
-            MemoryHelpers.IsInGameOrCutscene(),
+            MemoryHelpers.IsOutOfTitleScreen(),
             !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber??0),
             !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber??0),
-            //!Memory.ReadBit(Addresses.DungeonMapFlag.Address, Addresses.DungeonMapFlag.BitNumber??0),
-            //!Memory.ReadBit(Addresses.PauseMenuFlag.Address, Addresses.PauseMenuFlag.BitNumber??0),
-            !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber??0),
-            !Memory.ReadBit(Addresses.CameraAlteredFlag.Address, Addresses.CameraAlteredFlag.BitNumber??0) || (
-                new short [] {
-                    0x0803,  // Allow locations to be checked during the Beast Hunter minigame since the camera is altered but the player is still in game.
-                    0x0F01   // Turn in missing bag has altered camera
-                }.Contains(Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big))
-            )
+            !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber??0)
         ];
         return conditions.All(value => value);
     }
@@ -796,7 +792,7 @@ public partial class App : Application
             if (locationData.TextBoxStartAddress != null)
             {
                 ItemData itemData = ScoutedLocationItemData[e.CompletedLocation.Id];
-                OverwrittenTextData = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));
+                TextDataToWriteQueue.Enqueue(TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData)));
             }
         }
         return;
