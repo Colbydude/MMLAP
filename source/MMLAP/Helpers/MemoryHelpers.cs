@@ -1,4 +1,5 @@
 ﻿using Archipelago.Core.Util;
+using Serilog;
 using System.Linq;
 
 namespace MMLAP.Helpers
@@ -12,10 +13,11 @@ namespace MMLAP.Helpers
 
         public static bool IsOutOfTitleScreen()
         {
-            bool[] conditions = [
-                Memory.ReadByte(Addresses.TitleScreen.Address) == 0xA4,
-                new short [] {
-                    0x0000,  // Voiceover cutscene
+            bool isInGameOrCutscene = Memory.ReadByte(Addresses.TitleScreen.Address) == 0xA4;
+            short currentLevelID = Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+            bool isInTitleScreenCutscene = new short[] 
+            {
+                    0x0100,  // Scrolling text cutscene
                     0x0700,  // Gesselschaft cutscene
                     0x0701,  // Gesselschaft cutscene
                     0x0702,  // Gesselschaft cutscene
@@ -24,9 +26,8 @@ namespace MMLAP.Helpers
                     0x0705,  // Gesselschaft cutscene
                     0x0706,  // Gesselschaft cutscene
                     0x0707   // Gesselschaft cutscene
-                }.Contains(Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big))
-            ];
-            return conditions.All(value => value);
+            }.Contains(currentLevelID);
+            return isInGameOrCutscene && !isInTitleScreenCutscene;
         }
     }
 }

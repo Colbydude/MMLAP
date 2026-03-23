@@ -48,10 +48,11 @@ public partial class App : Application
     private static List<ILocation>? GameLocations { get; set; }
     private static string? PlayerName { get; set; }
     private static bool HasSubmittedGoal { get; set; } = false;
+    private static int IsInGameSyncInitialized = 0;
     private static Timer? GameLoopTimer { get; set; }
     private static int IsGameLoopRunning = 0;
     private static Timer? StartMMLTimer { get; set; }
-    private static ConcurrentQueue<TextData> TextDataToWriteQueue { get; set; } = new();
+    private static ConcurrentStack<TextData> TextDataToWriteStack { get; set; } = new();
     private static ushort? PreviousLevelID { get; set; }
     private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
@@ -222,6 +223,7 @@ public partial class App : Application
     private async void Context_ConnectClicked(object? sender, ConnectClickedEventArgs e)
     {
         Context.ConnectButtonEnabled = false;
+        System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
         Log.Logger.Information("Connecting..."); 
 
         // Refreshing subscriptions
@@ -341,8 +343,8 @@ public partial class App : Application
         }
         Log.Logger.Information("Warnings and errors above are okay if this is your first time connecting to this multiworld server.");
 
-        APClient.MonitorLocationsAsync(GameLocations);
-        await APClient.ReceiveReady();
+        //APClient.MonitorLocationsAsync(GameLocations);
+        //await APClient.ReceiveReady();
 
         Context.ConnectButtonEnabled = true;
         return;
@@ -355,8 +357,10 @@ public partial class App : Application
             // Ensure player is in game before starting gameplay loop
             StartMMLTimer = new Timer();
             StartMMLTimer.Elapsed += new ElapsedEventHandler(StartMMLGame);
-            StartMMLTimer.Interval = 5000;
+            StartMMLTimer.Interval = 500;
             StartMMLTimer.Enabled = true;
+
+            System.Threading.Thread.Sleep(250);
 
             // Start gameplay loop
             GameLoopTimer = new Timer();
@@ -376,7 +380,7 @@ public partial class App : Application
             }
             catch (Exception ex)
             {
-                Log.Logger.Verbose($"Failed to write connection details\r\n{ex.ToString()}");
+                Log.Logger.Debug($"Failed to write connection details\r\n{ex.ToString()}");
             }
             // Repopulate hint list.  There is likely a better way to do this using the Get network protocol
             // with keys=[$"hints_{team}_{slot}"].
@@ -393,6 +397,7 @@ public partial class App : Application
         StartMMLTimer?.Enabled = false;
         GameLoopTimer?.Enabled = false;
         HasSubmittedGoal = false;
+        System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
         return;
     }
 
@@ -402,11 +407,15 @@ public partial class App : Application
             APClient != null &&
             APClient.ItemManager != null &&
             APClient.CurrentSession != null && 
-            LocationManager_EnableLocationsCondition()
+            GameLocations != null &&
+            LocationManager_EnableLocationsCondition() &&
+            System.Threading.Interlocked.CompareExchange(ref IsInGameSyncInitialized, 1, 0) == 0 // Only start the game loop once per connection
         )
         {
             StartMMLTimer?.Enabled = false;
-            _ = APClient.ReceiveReady();
+            APClient.MonitorLocationsAsync(GameLocations);
+            await APClient.ReceiveReady();
+            Log.Logger.Debug("In-game confirmed. Location monitoring and item receive are now enabled.");
         }
         return;
     }
@@ -583,7 +592,7 @@ public partial class App : Application
                                         iraLocationData.TextBoxStartAddress != null
                                     )
                                     {
-                                        TextDataToWriteQueue.Enqueue(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData)));
+                                        TextDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData)));
                                     }
                                     break;
                                 case { RoomName: "Junk Shop" }:
@@ -644,12 +653,12 @@ public partial class App : Application
                         }
 
                         // Task 3: If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
-                        if (
-                            !Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber ?? 7) &&
-                            TextDataToWriteQueue.TryDequeue(out var OverwrittenTextData)
-                        )
+                        if (!Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber ?? 7))
                         {
-                            Memory.WriteByteArray(OverwrittenTextData.StartAddress, OverwrittenTextData.TextByteArr);
+                            while(TextDataToWriteStack.TryPop(out var overwrittenTextData))
+                            {
+                                Memory.WriteByteArray(overwrittenTextData.StartAddress, overwrittenTextData.TextByteArr);
+                            }
                         }
                     }
 
@@ -792,7 +801,9 @@ public partial class App : Application
             if (locationData.TextBoxStartAddress != null)
             {
                 ItemData itemData = ScoutedLocationItemData[e.CompletedLocation.Id];
-                TextDataToWriteQueue.Enqueue(TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData)));
+                TextData overwrittenText = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));
+                Log.Logger.Information(TextHelpers.TranslateEncoding(overwrittenText.TextByteArr));
+                TextDataToWriteStack.Push(overwrittenText);
             }
         }
         return;
