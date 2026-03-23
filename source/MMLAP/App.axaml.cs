@@ -802,7 +802,6 @@ public partial class App : Application
             {
                 ItemData itemData = ScoutedLocationItemData[e.CompletedLocation.Id];
                 TextData overwrittenText = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));
-                Log.Logger.Information(TextHelpers.TranslateEncoding(overwrittenText.TextByteArr));
                 TextDataToWriteStack.Push(overwrittenText);
             }
         }
@@ -819,7 +818,7 @@ public partial class App : Application
         {
             ItemHelpers.ReceiveGenericItem(itemData);
             UpdateItemLog();
-            Log.Logger.Debug($"Item Received: {JsonConvert.SerializeObject(args.Item)}");
+            Log.Logger.Information($"Item Received: {JsonConvert.SerializeObject(args.Item)}");
         }
         return;
     }
