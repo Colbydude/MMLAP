@@ -3,6 +3,7 @@ using MMLAP.Models;
 using static MMLAP.Models.MMLEnums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MMLAP.Helpers
 {
@@ -121,6 +122,13 @@ namespace MMLAP.Helpers
             { '=', 0x83 },
             { '\n', 0x86 }
            };
+
+        public static string TranslateEncoding(byte[] encodedText)
+        {
+            Dictionary<byte, char> reversed = charDict.ToDictionary(x => x.Value, x => x.Key);
+            string res = new(encodedText.Select(b => reversed.TryGetValue(b, out char c) ? c : '?').ToArray());
+            return res;
+        }
 
         public static byte[] ConcatArrays(byte[] x, byte[] y)
         {
