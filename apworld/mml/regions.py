@@ -153,7 +153,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         return has_all([has_completed_cardon_forest(), has_jump_springs(), has_lake_jyun_keys()])
     
     def has_completed_clozer_woods() -> Callable[[CollectionState], bool]:
-        return has_all([has_completed_cardon_forest(), has_completed_lake_jyun(), has_clozer_woods_keys(), has_explosive_wep()])
+        return has_all([has_completed_cardon_forest(), has_completed_lake_jyun(), has_clozer_woods_keys()]) # explosives aren't required to turn in keys in a randomizer
 
     # Current Assumptions:
     # - Yellow Refractor = No requirement b/c cardon keys aren't randomized

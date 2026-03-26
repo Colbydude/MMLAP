@@ -466,7 +466,7 @@ namespace MMLAP.Helpers
                 { 90,  new LocationData(90,  "Main Gate, Boss corridor chest",                                LocationCategory.Hole,      levelDataDict[0x1A01], itemDataDict[0x0211], new AddressData(0xBE404, 1, null), null, false, null,    0x8C735)  },
                 { 91,  new LocationData(91,  "Old City Sub-City, Chest",                                      LocationCategory.Container, levelDataDict[0x1D03], itemDataDict[0x0237], new AddressData(0xBE404, 4, null), null, false, 0x9F114, 0x8C735)  },
                 { 92,  new LocationData(92,  "Downtown Sub-City, Chest",                                      LocationCategory.Container, levelDataDict[0x1D04], itemDataDict[0x0238], new AddressData(0xBE404, 3, null), null, false, 0x9F114, 0x8C735)  },
-                { 93,  new LocationData(93,  "Uptown Sub-City, Chest",                                        LocationCategory.Container, levelDataDict[0x1D05], itemDataDict[0x0239], new AddressData(0xBE404, 0, null), null, false, 0x9F114, 0x8C735)  },
+                { 93,  new LocationData(93,  "Uptown Sub-City, Chest",                                        LocationCategory.Container, levelDataDict[0x1D05], itemDataDict[0x0239], new AddressData(0xBE404, 2, null), null, false, 0x9F114, 0x8C735)  },
                 { 94,  new LocationData(94,  "Flutter, Study chest",                                          LocationCategory.Hole,      levelDataDict[0x1B05], itemDataDict[0x0261], new AddressData(0xBE3E1, 5, null), null, false, null,    0x15333F) },
                 { 95,  new LocationData(95,  "Escape the Ocean Tower",                                        LocationCategory.Combat,    null,                  itemDataDict[0x00FF], new AddressData(0xBE3E8, 4, null), null, false, null,    null)     },
                 { 96,  new LocationData(96,  "Ferdinand defeated",                                            LocationCategory.Combat,    null,                  itemDataDict[0x00FF], new AddressData(0xBE383, 6, null), null, false, null,    null)     },
@@ -500,7 +500,8 @@ namespace MMLAP.Helpers
                 { 124, new LocationData(124, "Gift Flower to Roll",                                           LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 7, null), null, false, null,    null)     },
                 { 125, new LocationData(125, "Gift Music Box to Roll",                                        LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 6, null), null, false, null,    null)     },
                 { 126, new LocationData(126, "Gift Ring to Roll",                                             LocationCategory.Quest,     null,                  itemDataDict[0x00FF], new AddressData(0xBE3B4, 5, null), null, false, null,    null)     },
-                { 127, new LocationData(127, "Turn in missing bag",                                           LocationCategory.Quest,     levelDataDict[0x0F01], itemDataDict[0x0268], new AddressData(0xBE3BA, 6, null), null, false, null,    0x1539A2) }
+                { 127, new LocationData(127, "Turn in missing bag",                                           LocationCategory.Quest,     levelDataDict[0x0F01], itemDataDict[0x0268], new AddressData(0xBE3BA, 6, null), null, false, null,    0x1539A2) },
+              //{ 128, new LocationData(128, "Gai-nee Tooren defeated",                                       LocationCategory.Combat,    levelDataDict[0x1D02], itemDataDict[0x00FF], new AddressData(0xBE386, 6, null), null, false, null,    null)     }
             };
             return locationDataDict;
         }
