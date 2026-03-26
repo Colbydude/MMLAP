@@ -36,8 +36,8 @@ namespace MMLAP;
 public partial class App : Application
 {
     // TODO: Remember to set this in MMLAP.Desktop as well.
-    public static readonly string Version = "0.2.3";
-    public static readonly List<string> SupportedVersions = ["0.2.0", "0.2.1", "0.2.2", "0.2.3"];
+    public static readonly string Version = "0.2.4";
+    public static readonly List<string> SupportedVersions = ["0.2.0", "0.2.1", "0.2.2", "0.2.3", "0.2.4"];
 
     public static MainWindowViewModel? Context;
     public static ArchipelagoClient? APClient { get; set; }
@@ -818,7 +818,6 @@ public partial class App : Application
         {
             ItemHelpers.ReceiveGenericItem(itemData);
             UpdateItemLog();
-            Log.Logger.Information($"Item Received: {JsonConvert.SerializeObject(args.Item)}");
         }
         return;
     }
