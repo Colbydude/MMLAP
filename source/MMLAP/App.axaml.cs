@@ -36,8 +36,9 @@ namespace MMLAP;
 public partial class App : Application
 {
     // TODO: Remember to set this in MMLAP.Desktop as well.
-    public static readonly string Version = "0.2.4";
-    public static readonly List<string> SupportedVersions = ["0.2.0", "0.2.1", "0.2.2", "0.2.3", "0.2.4"];
+    public static readonly string Version = "0.2.5";
+    public static readonly List<string> SupportedVersions = ["0.2.0", "0.2.1", "0.2.2", "0.2.3", "0.2.4", "0.2.5"];
+
 
     public static MainWindowViewModel? Context;
     public static ArchipelagoClient? APClient { get; set; }
@@ -606,7 +607,8 @@ public partial class App : Application
                                     )
                                     {
                                         //OverwrittenTextData = TextHelpers.OverwriteText(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData));
-                                        Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
+                                        byte[] writeTextArr = TextHelpers.ConcatArrays(TextHelpers.newPage, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84])); 
+                                        Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                                     }
                                     break;
                                 case { RoomName: "City Hall Outdoors" }:
