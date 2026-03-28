@@ -606,7 +606,8 @@ public partial class App : Application
                                     )
                                     {
                                         //OverwrittenTextData = TextHelpers.OverwriteText(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData));
-                                        Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
+                                        byte[] writeTextArr = TextHelpers.ConcatArrays(TextHelpers.newPage, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84])); 
+                                        Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                                     }
                                     break;
                                 case { RoomName: "City Hall Outdoors" }:
